@@ -11,16 +11,15 @@ custom_css = """
 
 html, body, [class*="css"] {
     font-family: 'Lexend', sans-serif;
-    background-color: #e8f5e9;
+    background-color: #ffffff;
     padding: 24px;
 }
 
-/* Make Streamlit's main layout area pastel green */
+/* Floating card container */
 section.main {
-    background-color: #e8f5e9 !important;
+    background-color: #ffffff !important;
 }
 
-/* Floating card effect */
 .block-container {
     background-color: #ffffff;
     border-radius: 18px;
@@ -91,7 +90,7 @@ st.markdown(custom_css, unsafe_allow_html=True)
 st.markdown("""
 <div class="title-text">noqari 1.0</div>
 <div style="text-align:center; font-size:1.6rem;">💌</div>
-<div class="tagline">sincerely, your tiny tab fairy</div>
+<div class="tagline">the happiest place on earth (for VLOOKUP formulas).</div>
 """, unsafe_allow_html=True)
 
 # ---------------- File Upload Box ---------------- #
@@ -153,5 +152,5 @@ st.markdown("""
     <strong>NOTE:</strong> To ensure the code runs correctly, the file must be renamed to <code>PCARD_OPEN</code> and saved in <code>.xlsx</code> format.<br>
     Files with a different name or format will not be processed.
 </div>
-<div class="thank-you">Thanks so much!</div>
+<div class="thank-you">sincerely, your tiny tab fairy</div>
 """, unsafe_allow_html=True)
