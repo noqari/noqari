@@ -7,7 +7,7 @@ st.set_page_config(page_title="noqari 1.0", layout="centered")
 
 custom_css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=Marck+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=DM+Serif+Display&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Lexend', sans-serif;
@@ -24,15 +24,16 @@ html, body, [class*="css"] {
 }
 
 .title-text {
+    font-family: 'Georgia', serif;
     font-size: 3rem;
-    font-weight: 700;
+    font-weight: bold;
     color: #111111;
     text-align: center;
     margin-bottom: 0.2rem;
 }
 
 .tagline {
-    font-family: 'Marck Script', cursive;
+    font-family: 'DM Serif Display', serif;
     text-align: center;
     font-size: 1.4rem;
     margin-bottom: 20px;
@@ -46,6 +47,21 @@ html, body, [class*="css"] {
     border: 1px solid #e6e6e6;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+
+.footer-note {
+    font-size: 0.95rem;
+    text-align: center;
+    margin-top: 50px;
+    color: #333;
+}
+
+.thank-you {
+    font-family: 'Georgia', serif;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #FF69B4;
+    margin-top: 8px;
+}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
@@ -53,7 +69,7 @@ st.markdown(custom_css, unsafe_allow_html=True)
 # ---------------- Header & Tagline ---------------- #
 st.markdown("""
 <div class="title-text">noqari 1.0</div>
-<div class="tagline">💌 saving lives and reputations since May 3rd, 2025 ✨</div>
+<div class="tagline">saving lives and reputations since May 3rd, 2025 💌</div>
 """, unsafe_allow_html=True)
 
 # ---------------- File Upload UI ---------------- #
@@ -106,5 +122,14 @@ if uploaded_file:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 else:
-    st.info("👆 Upload the PCARD_OPEN.xlsx file to get started.")
+    st.info("Please upload PCARD_OPEN.xlsx file to get started!")
+
+# ---------------- Footer Note ---------------- #
+st.markdown("""
+<div class="footer-note">
+    <strong>Note:</strong> Please ensure your file is renamed to <code>PCARD_OPEN.xlsx</code> before uploading,<br>
+    or the app will not be able to process it.
+</div>
+<div class="thank-you">Thank you!</div>
+""", unsafe_allow_html=True)
 
