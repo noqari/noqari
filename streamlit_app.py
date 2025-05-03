@@ -16,7 +16,7 @@ html, body, [class*="css"] {
     padding: 24px;
     background-image: 
         linear-gradient(#fefdf8, #fefdf8),
-        url("https://i.imgur.com/0R0o0Aw.png");  /* Light gold floral border */
+        url("https://i.imgur.com/0R0o0Aw.png");
     background-origin: border-box;
     background-clip: content-box, border-box;
     background-repeat: no-repeat;
@@ -36,8 +36,14 @@ html, body, [class*="css"] {
     font-family: 'DM Serif Display', serif;
     text-align: center;
     font-size: 1.4rem;
-    margin-bottom: 20px;
-    color: #444;
+    margin-bottom: 12px;
+    color: #FF69B4;  /* Hot pink */
+}
+
+.emoji-line {
+    text-align: center;
+    font-size: 1.4rem;
+    margin-bottom: 24px;
 }
 
 .uploadbox {
@@ -69,7 +75,8 @@ st.markdown(custom_css, unsafe_allow_html=True)
 # ---------------- Header & Tagline ---------------- #
 st.markdown("""
 <div class="title-text">noqari 1.0</div>
-<div class="tagline">saving lives and reputations since May 3rd, 2025 💌</div>
+<div class="tagline">saving lives and reputations since May 3rd, 2025</div>
+<div class="emoji-line">💌</div>
 """, unsafe_allow_html=True)
 
 # ---------------- File Upload UI ---------------- #
@@ -122,7 +129,7 @@ if uploaded_file:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 else:
-    st.info("Please upload PCARD_OPEN.xlsx file to get started!")
+    st.info("Please upload your PCARD_OPEN file to get started!")
 
 # ---------------- Footer Note ---------------- #
 st.markdown("""
@@ -132,4 +139,3 @@ st.markdown("""
 </div>
 <div class="thank-you">Thank you!</div>
 """, unsafe_allow_html=True)
-
