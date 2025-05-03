@@ -15,11 +15,19 @@ html, body, [class*="css"] {
 }
 
 h1 {
-    color: #FF66B3;
+    color: #FFB6C1;  /* Soft Rose Pink */
     font-size: 2.8rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
     text-align: center;
+    position: relative;
+    animation: sparkleFade 2s ease-in-out;
+}
+
+@keyframes sparkleFade {
+  0% { opacity: 0; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.03); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 .tagline {
@@ -55,7 +63,7 @@ with st.container():
 
 # ---------------- Excel Logic ---------------- #
 if uploaded_file:
-    st.success("✅ File uploaded! Processing...")
+    st.success("💌 File uploaded! Processing...")
 
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
@@ -89,7 +97,7 @@ if uploaded_file:
     output = BytesIO()
     wb.save(output)
 
-    st.success("🎉 All done! Your file is ready to download:")
+    st.success("✨ All done! Your file is ready to download:")
     st.download_button(
         label="📥 Download Updated File",
         data=output.getvalue(),
@@ -98,3 +106,4 @@ if uploaded_file:
     )
 else:
     st.info("👆 Upload the PCARD_OPEN.xlsx file to get started.")
+
