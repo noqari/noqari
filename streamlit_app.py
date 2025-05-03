@@ -3,38 +3,40 @@ import openpyxl
 from io import BytesIO
 
 # ---------------- Custom Styles ---------------- #
-st.set_page_config(page_title="welcome to noqari 1.0!!!", layout="centered")
+st.set_page_config(page_title="noqari 1.0", layout="centered")
 
 custom_css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=DM+Serif+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=Marck+Script&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Lexend', sans-serif;
-    background-color: #f8f9fb;
+    background-color: #fefdf8;
+    border: 24px solid transparent;
+    padding: 24px;
+    background-image: 
+        linear-gradient(#fefdf8, #fefdf8),
+        url("https://i.imgur.com/0R0o0Aw.png");  /* Light gold floral border */
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .title-text {
-    font-size: 2.8rem;
+    font-size: 3rem;
     font-weight: 700;
-    color: #FFB6C1;  /* Soft Rose Pink */
+    color: #111111;
     text-align: center;
-    margin-bottom: 0.5rem;
-    animation: sparkleFade 2s ease-in-out;
-}
-
-@keyframes sparkleFade {
-  0% { opacity: 0; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.03); }
-  100% { opacity: 1; transform: scale(1); }
+    margin-bottom: 0.2rem;
 }
 
 .tagline {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Marck Script', cursive;
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     margin-bottom: 20px;
-    color: #333;
+    color: #444;
 }
 
 .uploadbox {
@@ -50,8 +52,8 @@ st.markdown(custom_css, unsafe_allow_html=True)
 
 # ---------------- Header & Tagline ---------------- #
 st.markdown("""
-<div class="title-text">🌸 welcome to noqari 1.0!!! 🌸</div>
-<div class="tagline">noqari: saving lives and reputations since its inception on May 3rd, 2025.</div>
+<div class="title-text">noqari 1.0</div>
+<div class="tagline">💌 saving lives and reputations since May 3rd, 2025 ✨</div>
 """, unsafe_allow_html=True)
 
 # ---------------- File Upload UI ---------------- #
@@ -60,7 +62,7 @@ with st.container():
     uploaded_file = st.file_uploader("📤 Upload your PCARD_OPEN.xlsx file here:", type="xlsx")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- Excel Logic ---------------- #
+# ---------------- Excel Logic (Unchanged) ---------------- #
 if uploaded_file:
     st.success("💌 File uploaded! Processing...")
 
@@ -105,3 +107,4 @@ if uploaded_file:
     )
 else:
     st.info("👆 Upload the PCARD_OPEN.xlsx file to get started.")
+
