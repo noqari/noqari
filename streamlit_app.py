@@ -11,8 +11,23 @@ custom_css = """
 
 html, body, [class*="css"] {
     font-family: 'Lexend', sans-serif;
-    background-color: #e8f5e9;  /* pastel green */
+    background-color: #e8f5e9;
     padding: 24px;
+}
+
+/* Make Streamlit's main layout area pastel green */
+section.main {
+    background-color: #e8f5e9 !important;
+}
+
+/* Floating card effect */
+.block-container {
+    background-color: #ffffff;
+    border-radius: 18px;
+    padding: 3rem 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    max-width: 800px;
+    margin: auto;
 }
 
 .title-text {
@@ -140,4 +155,3 @@ st.markdown("""
 </div>
 <div class="thank-you">Thanks so much!</div>
 """, unsafe_allow_html=True)
-
