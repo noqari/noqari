@@ -64,6 +64,18 @@ html, body, [class*="css"] {
     color: #FF69B4;
     margin-top: 8px;
 }
+
+/* Remove white gap from hidden file_uploader label */
+section[data-testid="stFileUploader"] label {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Center info box text */
+div[data-testid="stAlert"] {
+    text-align: center;
+}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
@@ -75,8 +87,9 @@ st.markdown("""
 <div class="tagline">sincerely, your tiny tab fairy</div>
 """, unsafe_allow_html=True)
 
-# ---------------- New Info Message ABOVE Upload ---------------- #
+# ---------------- Centered Info Box + Gold Rule ---------------- #
 st.info("Please upload your PCARD_OPEN.xlsx file to get started!")
+st.markdown("<hr style='border: none; height: 2px; background-color: gold;'>", unsafe_allow_html=True)
 
 # ---------------- File Upload Box ---------------- #
 with st.container():
@@ -128,7 +141,7 @@ if uploaded_file:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-# ---------------- Footer Note + Thanks ---------------- #
+# ---------------- Footer Note + Thank You ---------------- #
 st.markdown("""
 <div class="footer-note">
     <strong>NOTE:</strong> To ensure the code runs correctly, the file must be renamed to <code>PCARD_OPEN</code> and saved in <code>.xlsx</code> format.<br>
@@ -136,3 +149,4 @@ st.markdown("""
 </div>
 <div class="thank-you">Thanks so much!</div>
 """, unsafe_allow_html=True)
+
