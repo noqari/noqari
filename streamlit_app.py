@@ -11,16 +11,8 @@ custom_css = """
 
 html, body, [class*="css"] {
     font-family: 'Lexend', sans-serif;
-    background-color: #fefdf8;
-    border: 24px solid transparent;
+    background-color: #e8f5e9;  /* pastel green */
     padding: 24px;
-    background-image: 
-        linear-gradient(#fefdf8, #fefdf8),
-        url("https://i.imgur.com/0R0o0Aw.png");
-    background-origin: border-box;
-    background-clip: content-box, border-box;
-    background-repeat: no-repeat;
-    background-size: cover;
 }
 
 .title-text {
@@ -37,7 +29,7 @@ html, body, [class*="css"] {
     text-align: center;
     font-size: 1.4rem;
     margin-top: 0.5rem;
-    margin-bottom: 12px;
+    margin-bottom: 0.5rem;
     color: #FF69B4;
 }
 
@@ -47,7 +39,7 @@ html, body, [class*="css"] {
     background-color: #ffffff;
     border: 1px solid #e6e6e6;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    margin-top: 12px;
+    margin-top: 0.5rem;
 }
 
 .footer-note {
@@ -87,15 +79,14 @@ st.markdown("""
 <div class="tagline">sincerely, your tiny tab fairy</div>
 """, unsafe_allow_html=True)
 
-# ---------------- Centered Info Box + Gold Rule ---------------- #
-st.info("Please upload your PCARD_OPEN.xlsx file to get started!")
-st.markdown("<hr style='border: none; height: 2px; background-color: gold;'>", unsafe_allow_html=True)
-
 # ---------------- File Upload Box ---------------- #
 with st.container():
     st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
     uploaded_file = st.file_uploader("", type="xlsx")
     st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------------- Info Message BELOW Uploader ---------------- #
+st.info("Please upload your PCARD_OPEN.xlsx file to get started!")
 
 # ---------------- Excel Logic (Unchanged) ---------------- #
 if uploaded_file:
