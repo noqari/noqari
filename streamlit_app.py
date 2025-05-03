@@ -36,14 +36,8 @@ html, body, [class*="css"] {
     font-family: 'DM Serif Display', serif;
     text-align: center;
     font-size: 1.4rem;
-    margin-bottom: 12px;
-    color: #FF69B4;  /* Hot pink */
-}
-
-.emoji-line {
-    text-align: center;
-    font-size: 1.4rem;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    color: #FF69B4;
 }
 
 .uploadbox {
@@ -66,7 +60,7 @@ html, body, [class*="css"] {
     text-align: center;
     font-size: 1.1rem;
     color: #FF69B4;
-    margin-top: 8px;
+    margin-top: 16px;
 }
 </style>
 """
@@ -75,17 +69,16 @@ st.markdown(custom_css, unsafe_allow_html=True)
 # ---------------- Header & Tagline ---------------- #
 st.markdown("""
 <div class="title-text">noqari 1.0</div>
-<div class="tagline">saving lives and reputations since May 3rd, 2025</div>
-<div class="emoji-line">💌</div>
+<div class="tagline">sincerely, your tiny tab fairy</div>
 """, unsafe_allow_html=True)
 
 # ---------------- File Upload UI ---------------- #
 with st.container():
     st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("📤 Upload your PCARD_OPEN.xlsx file here:", type="xlsx")
+    uploaded_file = st.file_uploader("Upload your PCARD_OPEN.xlsx file here:", type="xlsx")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- Excel Logic (Unchanged) ---------------- #
+# ---------------- Excel Logic (Untouched) ---------------- #
 if uploaded_file:
     st.success("💌 File uploaded! Processing...")
 
@@ -95,29 +88,22 @@ if uploaded_file:
 
     max_row = sheet1.max_row
 
-    # Step 1: F&G&H in column A (Sheet1 and Sheet2)
     for sheet in [sheet1, sheet2]:
         for row in range(2, max_row + 1):
             sheet[f"A{row}"] = f"=F{row}&G{row}&H{row}"
 
-    # Step 2: VLOOKUP formulas in P & Q
     for row in range(2, max_row + 1):
         sheet2[f"P{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:P),FALSE),"")'
         sheet2[f"Q{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")'
-
-    # Step 3: Clean-up in R & S
-    for row in range(2, max_row + 1):
         sheet2[f"R{row}"] = f'=IF(P{row}=0,"",P{row})'
         sheet2[f"S{row}"] = f'=IF(Q{row}=0,"",Q{row})'
 
-    # Step 4: Paste values from R & S over P & Q
     for row in range(2, max_row + 1):
         r_val = sheet2[f"R{row}"].value
         s_val = sheet2[f"S{row}"].value
         sheet2[f"P{row}"].value = r_val
         sheet2[f"Q{row}"].value = s_val
 
-    # Save result
     output = BytesIO()
     wb.save(output)
 
@@ -129,13 +115,13 @@ if uploaded_file:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 else:
-    st.info("Please upload your PCARD_OPEN file to get started!")
+    st.info("Please upload your PCARD_OPEN.xlsx file to get started!")
 
 # ---------------- Footer Note ---------------- #
 st.markdown("""
 <div class="footer-note">
     <strong>Note:</strong> Please ensure your file is renamed to <code>PCARD_OPEN.xlsx</code> before uploading,<br>
-    or the app will not be able to process it.
+    or the code will not be able to process it.
 </div>
-<div class="thank-you">Thank you!</div>
+<div class="thank-you">Thanks so much!</div>
 """, unsafe_allow_html=True)
