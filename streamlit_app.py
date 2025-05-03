@@ -7,20 +7,19 @@ st.set_page_config(page_title="welcome to noqari 1.0!!!", layout="centered")
 
 custom_css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=Parisienne&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=DM+Serif+Display&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Lexend', sans-serif;
     background-color: #f8f9fb;
 }
 
-h1 {
-    color: #FFB6C1;  /* Soft Rose Pink */
+.title-text {
     font-size: 2.8rem;
     font-weight: 700;
-    margin-bottom: 0.5rem;
+    color: #FFB6C1;  /* Soft Rose Pink */
     text-align: center;
-    position: relative;
+    margin-bottom: 0.5rem;
     animation: sparkleFade 2s ease-in-out;
 }
 
@@ -31,11 +30,11 @@ h1 {
 }
 
 .tagline {
-    font-family: 'Parisienne', cursive;
+    font-family: 'DM Serif Display', serif;
     text-align: center;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     margin-bottom: 20px;
-    color: #555;
+    color: #333;
 }
 
 .uploadbox {
@@ -51,7 +50,7 @@ st.markdown(custom_css, unsafe_allow_html=True)
 
 # ---------------- Header & Tagline ---------------- #
 st.markdown("""
-<h1>🌸 welcome to noqari 1.0!!! 🌸</h1>
+<div class="title-text">🌸 welcome to noqari 1.0!!! 🌸</div>
 <div class="tagline">noqari: saving lives and reputations since its inception on May 3rd, 2025.</div>
 """, unsafe_allow_html=True)
 
@@ -106,4 +105,3 @@ if uploaded_file:
     )
 else:
     st.info("👆 Upload the PCARD_OPEN.xlsx file to get started.")
-
