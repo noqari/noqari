@@ -2,12 +2,52 @@ import streamlit as st
 import openpyxl
 from io import BytesIO
 
-st.set_page_config(page_title="welcome to noqari!", layout="centered")
-st.title("👋 welcome to noqari!")
-st.markdown("Upload the **PCARD_OPEN.xlsx** file below and get back a fully processed version.")
+# ---------------- Custom Styles ---------------- #
+st.set_page_config(page_title="welcome to noqari 1.0!!!", layout="centered")
 
-uploaded_file = st.file_uploader("Upload PCARD_OPEN.xlsx", type="xlsx")
+custom_css = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap');
 
+html, body, [class*="css"] {
+    font-family: 'Lexend', sans-serif;
+    background-color: #f8f9fb;
+}
+
+h1 {
+    background: linear-gradient(90deg, #7F5AF0, #2CB67D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.uploadbox {
+    padding: 1rem;
+    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid #e6e6e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+</style>
+"""
+st.markdown(custom_css, unsafe_allow_html=True)
+
+# ---------------- Animated Intro Banner ---------------- #
+st.markdown("""
+<h1>🧠 welcome to noqari 1.0!!!</h1>
+<div style="font-size:1.1rem;margin-bottom:20px;">
+    <em>Your friendly daily PCARD processor. Upload the <strong>PCARD_OPEN.xlsx</strong> file and let noqari handle the cleanup.</em>
+</div>
+""", unsafe_allow_html=True)
+
+with st.container():
+    st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("📤 Upload your PCARD_OPEN.xlsx file here:", type="xlsx")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------------- Core Logic ---------------- #
 if uploaded_file:
     st.success("✅ File uploaded! Processing...")
 
@@ -44,7 +84,7 @@ if uploaded_file:
     output = BytesIO()
     wb.save(output)
 
-    st.success("🎉 Done! Download your updated PCARD_OPEN file:")
+    st.success("🎉 All done! Your file is ready to download:")
     st.download_button(
         label="📥 Download Updated File",
         data=output.getvalue(),
@@ -53,3 +93,4 @@ if uploaded_file:
     )
 else:
     st.info("👆 Upload the PCARD_OPEN.xlsx file to get started.")
+
