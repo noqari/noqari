@@ -21,6 +21,7 @@ h1 {
     font-size: 2.8rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
+    text-align: center;
 }
 
 .uploadbox {
@@ -34,46 +35,46 @@ h1 {
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# ---------------- Animated Intro Banner ---------------- #
+# ---------------- Header & Tagline ---------------- #
 st.markdown("""
-<h1>🧠 welcome to noqari 1.0!!!</h1>
-<div style="font-size:1.1rem;margin-bottom:20px;">
-    <em>Your friendly daily PCARD processor. Upload the <strong>PCARD_OPEN.xlsx</strong> file and let noqari handle the cleanup.</em>
+<h1>🌸 welcome to noqari 1.0!!! 🌸</h1>
+<div style="text-align:center; font-size:1.1rem; margin-bottom:20px;">
+    <em>noqari: saving lives and reputations since its inception on May 3rd, 2025.</em>
 </div>
 """, unsafe_allow_html=True)
 
+# ---------------- File Upload UI ---------------- #
 with st.container():
     st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
     uploaded_file = st.file_uploader("📤 Upload your PCARD_OPEN.xlsx file here:", type="xlsx")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- Core Logic ---------------- #
+# ---------------- Excel Logic ---------------- #
 if uploaded_file:
     st.success("✅ File uploaded! Processing...")
 
-    # Load workbook
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
     max_row = sheet1.max_row
 
-    # Step 1: =F2&G2&H2 in A2 down in both sheets
+    # Step 1: F&G&H in column A (Sheet1 and Sheet2)
     for sheet in [sheet1, sheet2]:
         for row in range(2, max_row + 1):
             sheet[f"A{row}"] = f"=F{row}&G{row}&H{row}"
 
-    # Step 2: VLOOKUP formulas in Sheet2 columns P and Q
+    # Step 2: VLOOKUP formulas in P & Q
     for row in range(2, max_row + 1):
         sheet2[f"P{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:P),FALSE),"")'
         sheet2[f"Q{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")'
 
-    # Step 3: Cleanup formulas in R and S
+    # Step 3: Clean-up in R & S
     for row in range(2, max_row + 1):
         sheet2[f"R{row}"] = f'=IF(P{row}=0,"",P{row})'
         sheet2[f"S{row}"] = f'=IF(Q{row}=0,"",Q{row})'
 
-    # Step 4: Copy VALUES from R and S over P and Q
+    # Step 4: Paste values from R & S over P & Q
     for row in range(2, max_row + 1):
         r_val = sheet2[f"R{row}"].value
         s_val = sheet2[f"S{row}"].value
@@ -93,4 +94,5 @@ if uploaded_file:
     )
 else:
     st.info("👆 Upload the PCARD_OPEN.xlsx file to get started.")
+
 
