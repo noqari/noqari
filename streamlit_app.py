@@ -38,7 +38,7 @@ html, body, [class*="css"] {
     font-size: 1.4rem;
     margin-top: 0.5rem;
     margin-bottom: 12px;
-    color: #FF69B4; /* soft pink */
+    color: #FF69B4;
 }
 
 .uploadbox {
@@ -47,6 +47,7 @@ html, body, [class*="css"] {
     background-color: #ffffff;
     border: 1px solid #e6e6e6;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-top: 12px;
 }
 
 .footer-note {
@@ -74,10 +75,13 @@ st.markdown("""
 <div class="tagline">sincerely, your tiny tab fairy</div>
 """, unsafe_allow_html=True)
 
-# ---------------- File Upload UI ---------------- #
+# ---------------- New Info Message ABOVE Upload ---------------- #
+st.info("Please upload your PCARD_OPEN.xlsx file to get started!")
+
+# ---------------- File Upload Box ---------------- #
 with st.container():
     st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("", type="xlsx")  # No label
+    uploaded_file = st.file_uploader("", type="xlsx")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------- Excel Logic (Unchanged) ---------------- #
@@ -123,13 +127,11 @@ if uploaded_file:
         file_name="PCARD_OPEN_Processed.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-else:
-    st.info("Please upload your PCARD_OPEN.xlsx file to get started!")
 
-# ---------------- Footer Note ---------------- #
+# ---------------- Footer Note + Thanks ---------------- #
 st.markdown("""
 <div class="footer-note">
-    <strong>Note:</strong> to ensure the code runs correctly, the file must be renamed to <code>PCARD_OPEN</code> and saved in <code>.xlsx</code> format.<br>
+    <strong>NOTE:</strong> To ensure the code runs correctly, the file must be renamed to <code>PCARD_OPEN</code> and saved in <code>.xlsx</code> format.<br>
     Files with a different name or format will not be processed.
 </div>
 <div class="thank-you">Thanks so much!</div>
