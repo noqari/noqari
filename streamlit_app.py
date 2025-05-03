@@ -36,8 +36,9 @@ html, body, [class*="css"] {
     font-family: 'DM Serif Display', serif;
     text-align: center;
     font-size: 1.4rem;
-    margin-bottom: 20px;
-    color: #FF69B4;
+    margin-top: 0.5rem;
+    margin-bottom: 12px;
+    color: #FF69B4; /* soft pink */
 }
 
 .uploadbox {
@@ -60,7 +61,7 @@ html, body, [class*="css"] {
     text-align: center;
     font-size: 1.1rem;
     color: #FF69B4;
-    margin-top: 16px;
+    margin-top: 8px;
 }
 </style>
 """
@@ -69,16 +70,17 @@ st.markdown(custom_css, unsafe_allow_html=True)
 # ---------------- Header & Tagline ---------------- #
 st.markdown("""
 <div class="title-text">noqari 1.0</div>
+<div style="text-align:center; font-size:1.6rem;">💌</div>
 <div class="tagline">sincerely, your tiny tab fairy</div>
 """, unsafe_allow_html=True)
 
 # ---------------- File Upload UI ---------------- #
 with st.container():
     st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Upload your PCARD_OPEN.xlsx file here:", type="xlsx")
+    uploaded_file = st.file_uploader("", type="xlsx")  # No label
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- Excel Logic (Untouched) ---------------- #
+# ---------------- Excel Logic (Unchanged) ---------------- #
 if uploaded_file:
     st.success("💌 File uploaded! Processing...")
 
@@ -88,22 +90,29 @@ if uploaded_file:
 
     max_row = sheet1.max_row
 
+    # Step 1: F&G&H in column A (Sheet1 and Sheet2)
     for sheet in [sheet1, sheet2]:
         for row in range(2, max_row + 1):
             sheet[f"A{row}"] = f"=F{row}&G{row}&H{row}"
 
+    # Step 2: VLOOKUP formulas in P & Q
     for row in range(2, max_row + 1):
         sheet2[f"P{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:P),FALSE),"")'
         sheet2[f"Q{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")'
+
+    # Step 3: Clean-up in R & S
+    for row in range(2, max_row + 1):
         sheet2[f"R{row}"] = f'=IF(P{row}=0,"",P{row})'
         sheet2[f"S{row}"] = f'=IF(Q{row}=0,"",Q{row})'
 
+    # Step 4: Paste values from R & S over P & Q
     for row in range(2, max_row + 1):
         r_val = sheet2[f"R{row}"].value
         s_val = sheet2[f"S{row}"].value
         sheet2[f"P{row}"].value = r_val
         sheet2[f"Q{row}"].value = s_val
 
+    # Save result
     output = BytesIO()
     wb.save(output)
 
@@ -120,9 +129,8 @@ else:
 # ---------------- Footer Note ---------------- #
 st.markdown("""
 <div class="footer-note">
-    <strong>Note:</strong> Please ensure your file is renamed to <code>PCARD_OPEN.xlsx</code> before uploading,<br>
-    or the code will not be able to process it.
+    <strong>Note:</strong> to ensure the code runs correctly, the file must be renamed to <code>PCARD_OPEN</code> and saved in <code>.xlsx</code> format.<br>
+    Files with a different name or format will not be processed.
 </div>
 <div class="thank-you">Thanks so much!</div>
 """, unsafe_allow_html=True)
-
