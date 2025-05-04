@@ -17,20 +17,15 @@ html, body, [class*="css"] {
     background-color: #ffffff;
     padding: 24px;
 }
-
-section.main {
-    background-color: #ffffff !important;
-}
-
+section.main { background-color: #ffffff !important; }
 .block-container {
     background-color: #ffffff;
     border-radius: 18px;
     padding: 3rem 2rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     max-width: 800px;
     margin: auto;
 }
-
 .title-text {
     font-family: 'Georgia', serif;
     font-size: 3rem;
@@ -39,16 +34,13 @@ section.main {
     text-align: center;
     margin-bottom: 0.2rem;
 }
-
 .tagline {
     font-family: 'DM Serif Display', serif;
     text-align: center;
     font-size: 1.4rem;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
+    margin: 0.5rem 0;
     color: #FF69B4;
 }
-
 .uploadbox {
     padding: 1rem;
     border-radius: 12px;
@@ -57,14 +49,12 @@ section.main {
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     margin-top: 0.5rem;
 }
-
 .footer-note {
     font-size: 0.95rem;
     text-align: center;
     margin-top: 50px;
     color: #333;
 }
-
 .thank-you {
     font-family: 'Georgia', serif;
     text-align: center;
@@ -74,14 +64,9 @@ section.main {
 }
 
 /* Hide default file_uploader label */
-section[data-testid="stFileUploader"] label {
-    display: none !important;
-}
-
+section[data-testid="stFileUploader"] label { display: none !important; }
 /* Center the info alert text */
-div[data-testid="stAlert"] {
-    text-align: center;
-}
+div[data-testid="stAlert"] { text-align: center; }
 
 /* Style & shimmer for the “Browse files” button */
 div[data-testid="stFileUploader"] button {
@@ -106,20 +91,17 @@ div[data-testid="stFileUploader"] button:hover::after {
     left: 100%;
 }
 
-/* Remove shimmer & box from the clear-file “X” */
-div[data-testid="stFileUploader"] button[title="Clear"]::after,
-div[data-testid="stFileUploader"] button[aria-label="Clear"]::after {
-    display: none !important;
+/* Clear‐file “X” in the upload progress list → plain pink icon, no box */
+div[data-testid="stFileUploadProgress"] button {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #FF69B4 !important;
+    padding: 0 !important;
+    width: auto !important;
 }
-div[data-testid="stFileUploader"] button[title="Clear"],
-div[data-testid="stFileUploader"] button[aria-label="Clear"] {
-    background: none        !important;
-    border: none            !important;
-    border-radius: 0        !important;
-    box-shadow: none        !important;
-    color: #FF69B4          !important;
-    padding: 0              !important;
-    width: auto             !important;
+div[data-testid="stFileUploadProgress"] button::after {
+    display: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
