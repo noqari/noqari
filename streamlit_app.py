@@ -100,14 +100,12 @@ with st.container():
 # ---------------- Info Message ---------------- #
 st.info("Please upload your PCARD_OPEN.xlsx file to get started!")
 
-# ---------------- Excel Logic (Untouched & Clean) ---------------- #
+# ---------------- Excel Logic (100% Clean) ---------------- #
 if uploaded_file:
-    st.success("File uploaded! Processing...")
-
+    # File uploaded
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
-
     max_row = sheet1.max_row
 
     for sheet in [sheet1, sheet2]:
@@ -125,12 +123,12 @@ if uploaded_file:
     output = BytesIO()
     wb.save(output)
 
-    # ✨ Success Message
+    # ✨ Custom success message
     st.markdown("<div style='text-align:center; font-size: 1.2rem; margin-top: 1.2rem;'>✨ All yours! Your file is ready to go!! ✨</div>", unsafe_allow_html=True)
 
-    # 🎨 Gradient Download Button (centered)
+    # 🎀 Gradient download button
     b64 = base64.b64encode(output.getvalue()).decode()
-    dl_link = f'''
+    st.markdown(f"""
         <div style="text-align:center; margin-top: 2rem;">
             <a href="data:application/octet-stream;base64,{b64}" download="PCARD_OPEN_Processed.xlsx"
                style="
@@ -150,8 +148,7 @@ if uploaded_file:
                onmouseout="this.style.opacity=1"
             >Download Processed File</a>
         </div>
-    '''
-    st.markdown(dl_link, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 # ---------------- Footer ---------------- #
 st.markdown("""
