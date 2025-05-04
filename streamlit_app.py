@@ -1,6 +1,7 @@
 import streamlit as st
 import openpyxl
 from io import BytesIO
+import base64
 
 # ---------------- Custom Styles ---------------- #
 st.set_page_config(page_title="noqari 1.0", layout="centered")
@@ -15,7 +16,6 @@ html, body, [class*="css"] {
     padding: 24px;
 }
 
-/* Floating card container */
 section.main {
     background-color: #ffffff !important;
 }
@@ -71,14 +71,12 @@ section.main {
     margin-top: 8px;
 }
 
-/* Remove white gap from hidden file_uploader label */
 section[data-testid="stFileUploader"] label {
     display: none !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
-/* Center info box text */
 div[data-testid="stAlert"] {
     text-align: center;
 }
@@ -93,16 +91,16 @@ st.markdown("""
 <div class="tagline">the happiest place on earth (for VLOOKUP formulas).</div>
 """, unsafe_allow_html=True)
 
-# ---------------- File Upload Box ---------------- #
+# ---------------- File Upload ---------------- #
 with st.container():
     st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
     uploaded_file = st.file_uploader("", type="xlsx")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- Info Message BELOW Uploader ---------------- #
+# ---------------- Info Message ---------------- #
 st.info("Please upload your PCARD_OPEN.xlsx file to get started!")
 
-# ---------------- Excel Logic (Unchanged) ---------------- #
+# ---------------- Excel Logic (Untouched & Clean) ---------------- #
 if uploaded_file:
     st.success("File uploaded! Processing...")
 
@@ -112,41 +110,50 @@ if uploaded_file:
 
     max_row = sheet1.max_row
 
-    # Step 1: F&G&H in column A (Sheet1 and Sheet2)
     for sheet in [sheet1, sheet2]:
         for row in range(2, max_row + 1):
             sheet[f"A{row}"] = f"=F{row}&G{row}&H{row}"
 
-    # Step 2: VLOOKUP formulas in P & Q
     for row in range(2, max_row + 1):
         sheet2[f"P{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:P),FALSE),"")'
         sheet2[f"Q{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")'
-
-    # Step 3: Clean-up in R & S
-    for row in range(2, max_row + 1):
         sheet2[f"R{row}"] = f'=IF(P{row}=0,"",P{row})'
         sheet2[f"S{row}"] = f'=IF(Q{row}=0,"",Q{row})'
+        sheet2[f"P{row}"].value = sheet2[f"R{row}"].value
+        sheet2[f"Q{row}"].value = sheet2[f"S{row}"].value
 
-    # Step 4: Paste values from R & S over P & Q
-    for row in range(2, max_row + 1):
-        r_val = sheet2[f"R{row}"].value
-        s_val = sheet2[f"S{row}"].value
-        sheet2[f"P{row}"].value = r_val
-        sheet2[f"Q{row}"].value = s_val
-
-    # Save result
     output = BytesIO()
     wb.save(output)
 
-    st.success("✨ All yours! Your file is ready to download!✨")
-    st.download_button(
-        label="Download Processed File",
-        data=output.getvalue(),
-        file_name="PCARD_OPEN_Processed.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    # ✨ Success Message
+    st.markdown("<div style='text-align:center; font-size: 1.2rem; margin-top: 1.2rem;'>✨ All yours! Your file is ready to go!! ✨</div>", unsafe_allow_html=True)
 
-# ---------------- Footer Note + Thank You ---------------- #
+    # 🎨 Gradient Download Button (centered)
+    b64 = base64.b64encode(output.getvalue()).decode()
+    dl_link = f'''
+        <div style="text-align:center; margin-top: 2rem;">
+            <a href="data:application/octet-stream;base64,{b64}" download="PCARD_OPEN_Processed.xlsx"
+               style="
+                   display: inline-block;
+                   padding: 0.75rem 1.5rem;
+                   font-size: 1rem;
+                   font-weight: 600;
+                   color: white;
+                   background: linear-gradient(90deg, #FF69B4, #FFD700);
+                   border: none;
+                   border-radius: 10px;
+                   text-decoration: none;
+                   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                   transition: all 0.3s ease-in-out;
+               "
+               onmouseover="this.style.opacity=0.9"
+               onmouseout="this.style.opacity=1"
+            >Download Processed File</a>
+        </div>
+    '''
+    st.markdown(dl_link, unsafe_allow_html=True)
+
+# ---------------- Footer ---------------- #
 st.markdown("""
 <div class="footer-note">
     <strong>NOTE:</strong> To ensure the code runs correctly, the file must be renamed to <code>PCARD_OPEN</code> and saved in <code>.xlsx</code> format.<br>
