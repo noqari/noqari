@@ -162,7 +162,7 @@ if uploaded_file:
         unsafe_allow_html=True
     )
 
-    # 🎀 Download button: Pink Gradient
+    # 🎀 Solid pink download button
     st.markdown(f"""
     <div style="text-align:center; margin-top:2rem;">
       <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}"
@@ -173,7 +173,7 @@ if uploaded_file:
            font-size:1rem;
            font-weight:600;
            color:white;
-           background:linear-gradient(90deg, #FF69B4, #FFB6C1);
+           background-color:#FF69B4;
            border:none;
            border-radius:10px;
            text-decoration:none;
