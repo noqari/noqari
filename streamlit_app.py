@@ -104,7 +104,7 @@ st.info("Please upload your PCARD_OPEN.xlsx file to get started!")
 
 # ---------------- Excel Logic (Unchanged) ---------------- #
 if uploaded_file:
-    st.success("💌 File uploaded! Processing...")
+    st.success("File uploaded! Processing...")
 
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
