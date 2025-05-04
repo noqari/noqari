@@ -1,5 +1,6 @@
 import streamlit as st
 import openpyxl
+from openpyxl.styles import Font
 from io import BytesIO
 import base64
 
@@ -64,20 +65,14 @@ section.main {
     color: #FF69B4;
     margin-top: 8px;
 }
-
-/* Hide the default file_uploader label */
 section[data-testid="stFileUploader"] label {
     display: none !important;
 }
-
-/* Center the info alert text */
 div[data-testid="stAlert"] {
     text-align: center;
 }
-
-/* Style and shimmer effect for the “Browse files” button */
 div[data-testid="stFileUploader"] button {
-    background-color: #FF69B4 !important;   /* Pink */
+    background-color: #FF69B4 !important;
     color: #ffffff !important;
     border: none !important;
     position: relative;
@@ -118,7 +113,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------- Excel Logic (Untouched) ---------------- #
+# ---------------- Excel Logic ---------------- #
 if uploaded_file:
     st.markdown("<div></div>", unsafe_allow_html=True)  # suppress default
 
@@ -127,30 +122,36 @@ if uploaded_file:
     sheet2 = wb.worksheets[1]
     max_row = sheet1.max_row
 
+    # Insert =F#&G#&H# and set Calibri 11
     for sheet in (sheet1, sheet2):
         for row in range(2, max_row + 1):
-            sheet[f"A{row}"] = f"=F{row}&G{row}&H{row}"
+            cell = sheet[f"A{row}"]
+            cell.value = f"=F{row}&G{row}&H{row}"
+            cell.font = Font(name="Calibri", size=11)
 
+    # Other formulas in Sheet2
     for row in range(2, max_row + 1):
         sheet2[f"P{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:P),FALSE),"")'
         sheet2[f"Q{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")'
         sheet2[f"R{row}"] = f'=IF(P{row}=0,"",P{row})'
         sheet2[f"S{row}"] = f'=IF(Q{row}=0,"",Q{row})'
+        # Values-only paste from R→P and S→Q
         sheet2[f"P{row}"].value = sheet2[f"R{row}"].value
         sheet2[f"Q{row}"].value = sheet2[f"S{row}"].value
 
+    # Save to buffer
     output = BytesIO()
     wb.save(output)
     b64 = base64.b64encode(output.getvalue()).decode()
 
-    # ✨ Custom Starry Success Message
+    # ✨ Success message
     st.markdown(
         "<div style='text-align:center; font-size:1.2rem; margin-top:1.2rem;'>"
         "✨ All yours! Your file is ready to go!! ✨</div>",
         unsafe_allow_html=True
     )
 
-    # 🎀 Gradient Download Button
+    # 🎀 Download button
     st.markdown(f"""
     <div style="text-align:center; margin-top:2rem;">
       <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}"
