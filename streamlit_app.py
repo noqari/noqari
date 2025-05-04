@@ -64,18 +64,21 @@ section.main {
     color: #FF69B4;
     margin-top: 8px;
 }
+
 /* Hide the default file_uploader label */
 section[data-testid="stFileUploader"] label {
     display: none !important;
 }
+
 /* Center the info alert text */
 div[data-testid="stAlert"] {
     text-align: center;
 }
+
 /* Style and shimmer effect for the “Browse files” button */
 div[data-testid="stFileUploader"] button {
-    background-color: #FFD700 !important;
-    color: #000000 !important;
+    background-color: #FF69B4 !important;   /* Pink */
+    color: #ffffff !important;
     border: none !important;
     position: relative;
     overflow: hidden;
@@ -107,11 +110,17 @@ uploaded_file = st.file_uploader("", type="xlsx")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------- Info Message ---------------- #
-st.markdown('<div style="text-align:center; background-color:#eaf3fc; padding:1rem; border-radius:8px; margin-top:1rem;">Please upload your PCARD_OPEN.xlsx file to get started!</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div style="text-align:center; background-color:#eaf3fc; padding:1rem; '
+    'border-radius:8px; margin-top:1rem;">'
+    'Please upload your PCARD_OPEN.xlsx file to get started!'
+    '</div>',
+    unsafe_allow_html=True
+)
 
 # ---------------- Excel Logic (Untouched) ---------------- #
 if uploaded_file:
-    st.markdown("<div></div>", unsafe_allow_html=True)  # suppress default alert
+    st.markdown("<div></div>", unsafe_allow_html=True)  # suppress default
 
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
@@ -135,7 +144,11 @@ if uploaded_file:
     b64 = base64.b64encode(output.getvalue()).decode()
 
     # ✨ Custom Starry Success Message
-    st.markdown("<div style='text-align:center; font-size:1.2rem; margin-top:1.2rem;'>✨ All yours! Your file is ready to go!! ✨</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div style='text-align:center; font-size:1.2rem; margin-top:1.2rem;'>"
+        "✨ All yours! Your file is ready to go!! ✨</div>",
+        unsafe_allow_html=True
+    )
 
     # 🎀 Gradient Download Button
     st.markdown(f"""
@@ -169,4 +182,3 @@ st.markdown("""
 </div>
 <div class="thank-you">sincerely, your tiny tab fairy</div>
 """, unsafe_allow_html=True)
-
