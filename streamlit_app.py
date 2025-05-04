@@ -102,7 +102,7 @@ st.info("Please upload your PCARD_OPEN.xlsx file to get started!")
 
 # ---------------- Excel Logic (Untouched & Clean) ---------------- #
 if uploaded_file:
-    st.empty()  # Prevent Streamlit default green success box
+    st.empty()  # prevents Streamlit default success message rendering
 
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
@@ -127,7 +127,7 @@ if uploaded_file:
     # ✨ Custom success message
     st.markdown("<div style='text-align:center; font-size: 1.2rem; margin-top: 1.2rem;'>✨ All yours! Your file is ready to go!! ✨</div>", unsafe_allow_html=True)
 
-    # 🎀 Gradient Download Button (HTML)
+    # 🎀 Custom Gradient Download Button
     b64 = base64.b64encode(output.getvalue()).decode()
     st.markdown(f"""
         <div style="text-align:center; margin-top: 2rem;">
