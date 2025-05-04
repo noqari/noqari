@@ -3,10 +3,11 @@ import openpyxl
 from io import BytesIO
 import base64
 
-# ---------------- Custom Styles ---------------- #
+# Page config
 st.set_page_config(page_title="noqari 1.0", layout="centered")
 
-custom_css = """
+# ---------------- CSS ---------------- #
+st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=DM+Serif+Display&display=swap');
 
@@ -15,11 +16,9 @@ html, body, [class*="css"] {
     background-color: #ffffff;
     padding: 24px;
 }
-
 section.main {
     background-color: #ffffff !important;
 }
-
 .block-container {
     background-color: #ffffff;
     border-radius: 18px;
@@ -28,7 +27,6 @@ section.main {
     max-width: 800px;
     margin: auto;
 }
-
 .title-text {
     font-family: 'Georgia', serif;
     font-size: 3rem;
@@ -37,7 +35,6 @@ section.main {
     text-align: center;
     margin-bottom: 0.2rem;
 }
-
 .tagline {
     font-family: 'DM Serif Display', serif;
     text-align: center;
@@ -46,7 +43,6 @@ section.main {
     margin-bottom: 0.5rem;
     color: #FF69B4;
 }
-
 .uploadbox {
     padding: 1rem;
     border-radius: 12px;
@@ -55,14 +51,12 @@ section.main {
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     margin-top: 0.5rem;
 }
-
 .footer-note {
     font-size: 0.95rem;
     text-align: center;
     margin-top: 50px;
     color: #333;
 }
-
 .thank-you {
     font-family: 'Georgia', serif;
     text-align: center;
@@ -70,39 +64,34 @@ section.main {
     color: #FF69B4;
     margin-top: 8px;
 }
-
 section[data-testid="stFileUploader"] label {
     display: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
 }
-
 div[data-testid="stAlert"] {
     text-align: center;
 }
 </style>
-"""
-st.markdown(custom_css, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# ---------------- Header & Tagline ---------------- #
+# ---------------- Header ---------------- #
 st.markdown("""
 <div class="title-text">noqari 1.0</div>
 <div style="text-align:center; font-size:1.6rem;">💌</div>
 <div class="tagline">the happiest place on earth (for VLOOKUP formulas).</div>
 """, unsafe_allow_html=True)
 
-# ---------------- File Upload ---------------- #
-with st.container():
-    st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("", type="xlsx")
-    st.markdown('</div>', unsafe_allow_html=True)
+# ---------------- Upload UI ---------------- #
+st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
+uploaded_file = st.file_uploader("", type="xlsx")
+st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- Info Message ---------------- #
-st.info("Please upload your PCARD_OPEN.xlsx file to get started!")
+# ---------------- Info Box ---------------- #
+st.markdown('<div style="text-align:center; background-color:#eaf3fc; padding:1rem; border-radius:8px; margin-top:1rem;">Please upload your PCARD_OPEN.xlsx file to get started!</div>', unsafe_allow_html=True)
 
-# ---------------- Excel Logic (Untouched & Clean) ---------------- #
+# ---------------- Excel Logic ---------------- #
 if uploaded_file:
-    st.empty()  # prevents Streamlit default success message rendering
+    # Prevent Streamlit default auto-render
+    st.markdown("<div></div>", unsafe_allow_html=True)
 
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
@@ -123,12 +112,12 @@ if uploaded_file:
 
     output = BytesIO()
     wb.save(output)
+    b64 = base64.b64encode(output.getvalue()).decode()
 
-    # ✨ Custom success message
+    # ✨ Custom Success Message
     st.markdown("<div style='text-align:center; font-size: 1.2rem; margin-top: 1.2rem;'>✨ All yours! Your file is ready to go!! ✨</div>", unsafe_allow_html=True)
 
     # 🎀 Custom Gradient Download Button
-    b64 = base64.b64encode(output.getvalue()).decode()
     st.markdown(f"""
         <div style="text-align:center; margin-top: 2rem;">
             <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}"
