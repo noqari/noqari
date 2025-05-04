@@ -3,10 +3,10 @@ import openpyxl
 from io import BytesIO
 import base64
 
-# Page config
+# ---------------- Page Config ---------------- #
 st.set_page_config(page_title="noqari 1.0", layout="centered")
 
-# ---------------- CSS ---------------- #
+# ---------------- Custom CSS ---------------- #
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=DM+Serif+Display&display=swap');
@@ -64,41 +64,61 @@ section.main {
     color: #FF69B4;
     margin-top: 8px;
 }
+/* Hide the default file_uploader label */
 section[data-testid="stFileUploader"] label {
     display: none !important;
 }
+/* Center the info alert text */
 div[data-testid="stAlert"] {
     text-align: center;
+}
+/* Style and shimmer effect for the “Browse files” button */
+div[data-testid="stFileUploader"] button {
+    background-color: #FFD700 !important;
+    color: #000000 !important;
+    border: none !important;
+    position: relative;
+    overflow: hidden;
+}
+div[data-testid="stFileUploader"] button::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.2), rgba(255,255,255,0.5), rgba(255,255,255,0.2));
+    transition: all 0.5s ease-in-out;
+}
+div[data-testid="stFileUploader"] button:hover::after {
+    left: 100%;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- Header ---------------- #
+# ---------------- Header & Tagline ---------------- #
 st.markdown("""
 <div class="title-text">noqari 1.0</div>
 <div style="text-align:center; font-size:1.6rem;">💌</div>
 <div class="tagline">the happiest place on earth (for VLOOKUP formulas).</div>
 """, unsafe_allow_html=True)
 
-# ---------------- Upload UI ---------------- #
+# ---------------- File Upload ---------------- #
 st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
 uploaded_file = st.file_uploader("", type="xlsx")
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- Info Box ---------------- #
+# ---------------- Info Message ---------------- #
 st.markdown('<div style="text-align:center; background-color:#eaf3fc; padding:1rem; border-radius:8px; margin-top:1rem;">Please upload your PCARD_OPEN.xlsx file to get started!</div>', unsafe_allow_html=True)
 
-# ---------------- Excel Logic ---------------- #
+# ---------------- Excel Logic (Untouched) ---------------- #
 if uploaded_file:
-    # Prevent Streamlit default auto-render
-    st.markdown("<div></div>", unsafe_allow_html=True)
+    st.markdown("<div></div>", unsafe_allow_html=True)  # suppress default alert
 
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
     max_row = sheet1.max_row
 
-    for sheet in [sheet1, sheet2]:
+    for sheet in (sheet1, sheet2):
         for row in range(2, max_row + 1):
             sheet[f"A{row}"] = f"=F{row}&G{row}&H{row}"
 
@@ -114,38 +134,39 @@ if uploaded_file:
     wb.save(output)
     b64 = base64.b64encode(output.getvalue()).decode()
 
-    # ✨ Custom Success Message
-    st.markdown("<div style='text-align:center; font-size: 1.2rem; margin-top: 1.2rem;'>✨ All yours! Your file is ready to go!! ✨</div>", unsafe_allow_html=True)
+    # ✨ Custom Starry Success Message
+    st.markdown("<div style='text-align:center; font-size:1.2rem; margin-top:1.2rem;'>✨ All yours! Your file is ready to go!! ✨</div>", unsafe_allow_html=True)
 
-    # 🎀 Custom Gradient Download Button
+    # 🎀 Gradient Download Button
     st.markdown(f"""
-        <div style="text-align:center; margin-top: 2rem;">
-            <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}"
-               download="PCARD_OPEN_Processed.xlsx"
-               style="
-                   display: inline-block;
-                   padding: 0.75rem 1.5rem;
-                   font-size: 1rem;
-                   font-weight: 600;
-                   color: white;
-                   background: linear-gradient(90deg, #FF69B4, #FFD700);
-                   border: none;
-                   border-radius: 10px;
-                   text-decoration: none;
-                   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                   transition: all 0.3s ease-in-out;
-               "
-               onmouseover="this.style.opacity=0.9"
-               onmouseout="this.style.opacity=1"
-            >Download Processed File</a>
-        </div>
+    <div style="text-align:center; margin-top:2rem;">
+      <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}"
+         download="PCARD_OPEN_Processed.xlsx"
+         style="
+           display:inline-block;
+           padding:0.75rem 1.5rem;
+           font-size:1rem;
+           font-weight:600;
+           color:white;
+           background:linear-gradient(90deg, #FF69B4, #FFD700);
+           border:none;
+           border-radius:10px;
+           text-decoration:none;
+           box-shadow:0 4px 12px rgba(0,0,0,0.15);
+           transition:all 0.3s ease-in-out;
+         "
+         onmouseover="this.style.opacity=0.9"
+         onmouseout="this.style.opacity=1"
+      >Download Processed File</a>
+    </div>
     """, unsafe_allow_html=True)
 
 # ---------------- Footer ---------------- #
 st.markdown("""
 <div class="footer-note">
-    <strong>NOTE:</strong> To ensure the code runs correctly, the file must be renamed to <code>PCARD_OPEN</code> and saved in <code>.xlsx</code> format.<br>
-    Files with a different name or format will not be processed.
+  <strong>NOTE:</strong> To ensure the code runs correctly, the file must be renamed to <code>PCARD_OPEN</code> and saved in <code>.xlsx</code> format.<br>
+  Files with a different name or format will not be processed.
 </div>
 <div class="thank-you">sincerely, your tiny tab fairy</div>
 """, unsafe_allow_html=True)
+
