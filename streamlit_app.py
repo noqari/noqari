@@ -107,15 +107,19 @@ div[data-testid="stFileUploader"] button:hover::after {
 }
 
 /* Remove shimmer & box from the clear-file “X” */
+div[data-testid="stFileUploader"] button[title="Clear"]::after,
 div[data-testid="stFileUploader"] button[aria-label="Clear"]::after {
     display: none !important;
 }
+div[data-testid="stFileUploader"] button[title="Clear"],
 div[data-testid="stFileUploader"] button[aria-label="Clear"] {
     background: none        !important;
     border: none            !important;
-    padding: 0              !important;
+    border-radius: 0        !important;
     box-shadow: none        !important;
     color: #FF69B4          !important;
+    padding: 0              !important;
+    width: auto             !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -141,7 +145,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------- Excel Logic (Untouched) ---------------- #
+# ---------------- Excel Logic (100% Untouched) ---------------- #
 if uploaded_file:
     # suppress default Streamlit alert
     st.markdown("<div></div>", unsafe_allow_html=True)
@@ -151,20 +155,19 @@ if uploaded_file:
     sheet2 = wb.worksheets[1]
     max_row = sheet1.max_row
 
-    # A-column concatenation formula + Calibri 11
+    # A-column formulas + Calibri 11
     for sheet in (sheet1, sheet2):
         for row in range(2, max_row + 1):
             cell = sheet[f"A{row}"]
             cell.value = f"=F{row}&G{row}&H{row}"
             cell.font = Font(name="Calibri", size=11)
 
-    # Sheet2 P/Q/R/S formulas + values-only paste
+    # Sheet2 P/Q/R/S logic + values-only paste
     for row in range(2, max_row + 1):
         sheet2[f"P{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:P),FALSE),"")'
         sheet2[f"Q{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")'
         sheet2[f"R{row}"] = f'=IF(P{row}=0,"",P{row})'
         sheet2[f"S{row}"] = f'=IF(Q{row}=0,"",Q{row})'
-        # Paste values only
         sheet2[f"P{row}"].value = sheet2[f"R{row}"].value
         sheet2[f"Q{row}"].value = sheet2[f"S{row}"].value
 
