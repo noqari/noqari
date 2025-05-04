@@ -17,7 +17,9 @@ html, body, [class*="css"] {
     background-color: #ffffff;
     padding: 24px;
 }
+
 section.main { background-color: #ffffff !important; }
+
 .block-container {
     background-color: #ffffff;
     border-radius: 18px;
@@ -26,6 +28,7 @@ section.main { background-color: #ffffff !important; }
     max-width: 800px;
     margin: auto;
 }
+
 .title-text {
     font-family: 'Georgia', serif;
     font-size: 3rem;
@@ -34,6 +37,7 @@ section.main { background-color: #ffffff !important; }
     text-align: center;
     margin-bottom: 0.2rem;
 }
+
 .tagline {
     font-family: 'DM Serif Display', serif;
     text-align: center;
@@ -41,6 +45,7 @@ section.main { background-color: #ffffff !important; }
     margin: 0.5rem 0;
     color: #FF69B4;
 }
+
 .uploadbox {
     padding: 1rem;
     border-radius: 12px;
@@ -49,12 +54,14 @@ section.main { background-color: #ffffff !important; }
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     margin-top: 0.5rem;
 }
+
 .footer-note {
     font-size: 0.95rem;
     text-align: center;
     margin-top: 50px;
     color: #333;
 }
+
 .thank-you {
     font-family: 'Georgia', serif;
     text-align: center;
@@ -64,9 +71,14 @@ section.main { background-color: #ffffff !important; }
 }
 
 /* Hide default file_uploader label */
-section[data-testid="stFileUploader"] label { display: none !important; }
+section[data-testid="stFileUploader"] label {
+    display: none !important;
+}
+
 /* Center the info alert text */
-div[data-testid="stAlert"] { text-align: center; }
+div[data-testid="stAlert"] {
+    text-align: center;
+}
 
 /* Style & shimmer for the “Browse files” button */
 div[data-testid="stFileUploader"] button {
@@ -91,7 +103,7 @@ div[data-testid="stFileUploader"] button:hover::after {
     left: 100%;
 }
 
-/* Clear‐file “X” in the upload progress list → plain pink icon, no box */
+/* Clear‐file “X” in the upload progress → plain pink icon */
 div[data-testid="stFileUploadProgress"] button {
     background: none !important;
     border: none !important;
@@ -150,6 +162,7 @@ if uploaded_file:
         sheet2[f"Q{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")'
         sheet2[f"R{row}"] = f'=IF(P{row}=0,"",P{row})'
         sheet2[f"S{row}"] = f'=IF(Q{row}=0,"",Q{row})'
+        # Paste values only
         sheet2[f"P{row}"].value = sheet2[f"R{row}"].value
         sheet2[f"Q{row}"].value = sheet2[f"S{row}"].value
 
@@ -164,7 +177,7 @@ if uploaded_file:
         unsafe_allow_html=True
     )
 
-    # 🎀 Gradient download button
+    # 🎀 Gradient download button (Sunset Glow)
     st.markdown(f"""
     <div style="text-align:center; margin-top:2rem;">
       <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}"
@@ -175,7 +188,7 @@ if uploaded_file:
            font-size:1rem;
            font-weight:600;
            color:white;
-           background:linear-gradient(90deg, #FF69B4, #FFD700);
+           background:linear-gradient(90deg, #FF5F6D, #FFC371);
            border:none;
            border-radius:10px;
            text-decoration:none;
