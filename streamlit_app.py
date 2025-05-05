@@ -65,6 +65,7 @@ section.main { background-color: #ffffff !important; }
 
 /* Hide default uploader label */
 section[data-testid="stFileUploader"] label { display: none !important; }
+
 /* Center info alert */
 div[data-testid="stAlert"] { text-align: center; }
 
@@ -91,15 +92,16 @@ div[data-testid="stFileUploader"] button:hover::after {
     left: 100%;
 }
 
-/* Clear-file “X”: solid pink icon, no border or background */
-div[data-testid="stFileUploadProgress"] button {
+/* Clear‐file “X”: solid pink icon, no pill or border */
+button[aria-label^="Clear"],
+button[title^="Clear"] {
     background: none !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
 }
-div[data-testid="stFileUploadProgress"] button > svg,
-div[data-testid="stFileUploadProgress"] button > svg path {
+button[aria-label^="Clear"] svg path,
+button[title^="Clear"] svg path {
     fill: #FF69B4 !important;
 }
 </style>
@@ -132,7 +134,7 @@ st.markdown(
 
 # ---------------- Excel Logic (100% Untouched) ---------------- #
 if uploaded_file:
-    # suppress default Streamlit alert
+    # Suppress default Streamlit alert
     st.markdown("<div></div>", unsafe_allow_html=True)
 
     wb = openpyxl.load_workbook(uploaded_file)
