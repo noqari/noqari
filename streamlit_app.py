@@ -66,6 +66,7 @@ section.main { background-color: #ffffff !important; }
 section[data-testid="stFileUploader"] label { display: none !important; }
 /* Center info alert */
 div[data-testid="stAlert"] { text-align: center; }
+
 /* Browse button: pink + shimmer */
 div[data-testid="stFileUploader"] button {
     background-color: #FF69B4 !important;
@@ -88,18 +89,8 @@ div[data-testid="stFileUploader"] button::after {
 div[data-testid="stFileUploader"] button:hover::after {
     left: 100%;
 }
-/* Clear-file “X”: plain pink icon */
-div[data-testid="stFileUploadProgress"] button {
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    color: #FF69B4 !important;
-    padding: 0 !important;
-    width: auto !important;
-}
-div[data-testid="stFileUploadProgress"] button::after {
-    display: none !important;
-}
+
+/* NOTE: Removed the “clear‐file X” CSS override so it will use Streamlit’s default styling again */
 </style>
 """, unsafe_allow_html=True)
 
@@ -138,7 +129,7 @@ if uploaded_file:
     sheet2 = wb.worksheets[1]
     max_row = sheet1.max_row
 
-    # A-column concatenation formulas + Calibri 11
+    # A-column concatenation + Calibri 11
     for sheet in (sheet1, sheet2):
         for row in range(2, max_row + 1):
             cell = sheet[f"A{row}"]
@@ -151,6 +142,7 @@ if uploaded_file:
         sheet2[f"Q{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")'
         sheet2[f"R{row}"] = f'=IF(P{row}=0,"",P{row})'
         sheet2[f"S{row}"] = f'=IF(Q{row}=0,"",Q{row})'
+        # values-only paste R→P, S→Q
         sheet2[f"P{row}"].value = sheet2[f"R{row}"].value
         sheet2[f"Q{row}"].value = sheet2[f"S{row}"].value
 
