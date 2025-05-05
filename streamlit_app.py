@@ -135,20 +135,18 @@ st.markdown(
 
 # ---------------- Excel Logic (Pure-Values) ---------------- #
 if uploaded_file:
-    # hide default alert
     st.markdown("<div></div>", unsafe_allow_html=True)
 
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
-    # 1) A-column formulas in both sheets (Calibri 11), filling each to its own max_row
+    # 1) A-column formulas in both sheets
     for sht in (sheet1, sheet2):
-        max_r = sht.max_row
-        for r in range(2, max_r + 1):
-            cell = sht[f"A{r}"]
-            cell.value = f"=F{r}&G{r}&H{r}"
-            cell.font = Font(name="Calibri", size=11)
+        for r in range(2, sht.max_row + 1):
+            c = sht[f"A{r}"]
+            c.value = f"=F{r}&G{r}&H{r}"
+            c.font = Font(name="Calibri", size=11)
 
     # 2) Build lookup dict from Sheet1
     lookup = {}
@@ -174,59 +172,48 @@ if uploaded_file:
         sheet2.cell(r, 16).value = p_val
         sheet2.cell(r, 17).value = q_val
 
-    # 4) Inject EBBS formulas into columns M, N and O (for later paste into EBBS L/M/N)
+    # 4) Inject EBBS formulas into M, N, O
     for r in range(2, sheet2.max_row + 1):
-        # M (col 13) = $A - $E (absolute) so it won't shift
+        # M (col 13): difference A - E (absolute cols)
         sheet2.cell(row=r, column=13).value = f"=$A{r}-$E{r}"
         sheet2.cell(row=r, column=13).font = Font(name="Calibri", size=11)
-        # N (col 14) = static pull from L
-        sheet2.cell(row=r, column=14).value = f"=$L{r}"
+        # N (col 14): static bucket formula referencing column L
+        sheet2.cell(row=r, column=14).value = (
+            f"=IF(AND($L{r}<=7),\"< 7\","  \
+            f"IF(AND($L{r}>7,$L{r}<=11),\"8-11\","   \
+            f"IF(AND($L{r}>11,$L{r}<=15),\"12-15\","   \
+            f"IF(AND($L{r}>15,$L{r}<=30),\"16-30\","   \
+            f"IF(AND($L{r}>30,$L{r}<=45),\"30-45\","   \
+            f"IF(AND($L{r}>45,$L{r}<=59),\"46-59\","   \
+            f"IF($L{r}>59,\"60 +\",\"Invalid\")))))))"
+        )
         sheet2.cell(row=r, column=14).font = Font(name="Calibri", size=11)
-        # O (col 15) = TEXT(F + 16) in numeric date format mm/dd/yyyy
+        # O (col 15): date = F + 16, numeric format
         sheet2.cell(row=r, column=15).value = f'=TEXT(F{r}+16,"mm/dd/yyyy")'
         sheet2.cell(row=r, column=15).font = Font(name="Calibri", size=11)
 
-    # 5) Save & provide download link
+    # 5) Save & download
     buf = BytesIO()
     wb.save(buf)
     b64 = base64.b64encode(buf.getvalue()).decode()
 
     st.markdown(
-        "<div style='text-align:center; font-size:1.2rem; margin-top:1.5rem;'>"
-        "✨ All yours! Your file is ready to go!! ✨</div>",
+        "<div style='text-align:center; font-size:1.2rem;'>✨ All yours! Your file is ready to go!! ✨</div>",
         unsafe_allow_html=True
     )
     st.markdown(f"""
-    <div style="text-align:center; margin-top:2rem;">
-      <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}"
-         download="PCARD_OPEN_Processed.xlsx"
-         style="
-           display: inline-block;
-           padding: 0.75rem 1.5rem;
-           font-size: 1rem;
-           font-weight: 600;
-           color: white;
-           background-color: #FF69B4;
-           border: none;
-           border-radius: 10px;
-           text-decoration: none;
-           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-           transition: all 0.3s ease-in-out;
-         "
-         onmouseover="this.style.opacity=0.9"
-         onmouseout="this.style.opacity=1"
-      >
-        Download Processed File
-      </a>
-    </div>
+      <div style="text-align:center; margin-top:1.5rem;">
+        <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}"
+           download="PCARD_OPEN_Processed.xlsx"
+           style="padding:0.75rem 1.5rem; background:#FF69B4; color:white; border-radius:10px; text-decoration:none; font-weight:600;"
+        >Download Processed File</a>
+      </div>
     """, unsafe_allow_html=True)
 
 # ---------------- Footer ---------------- #
 st.markdown("""
 <div class="footer-note">
-  <strong>NOTE:</strong> To ensure the code runs correctly, the file must be renamed to 
-  <code>PCARD_OPEN</code> and saved in <code>.xlsx</code> format.<br>
-  Files with a different name or format will not be processed.
+  <strong>NOTE:</strong> Rename to <code>PCARD_OPEN.xlsx</code> for correct processing.
 </div>
 <div class="thank-you">sincerely, your tiny tab fairy</div>
 """, unsafe_allow_html=True)
