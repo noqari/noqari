@@ -136,9 +136,9 @@ st.markdown(
 
 # ---------------- Excel Logic (Pure-Values + EBBS Formulas + Conditional Formatting) ---------------- #
 if uploaded_file:
-    # Load and force full recalculation on open
+    # Load workbook and force full recalculation on open
     wb = openpyxl.load_workbook(uploaded_file)
-    wb.calc_properties.fullCalcOnLoad = True
+    wb.calculation_properties.fullCalcOnLoad = True
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
@@ -156,10 +156,7 @@ if uploaded_file:
         g = sheet1.cell(r, 7).value or ""
         h = sheet1.cell(r, 8).value or ""
         key = f"{f}{g}{h}"
-        lookup[key] = (
-            sheet1.cell(r, 16).value,
-            sheet1.cell(r, 17).value
-        )
+        lookup[key] = (sheet1.cell(r, 16).value, sheet1.cell(r, 17).value)
 
     # 3) Write static values into Sheet2's P & Q
     for r in range(2, sheet2.max_row + 1):
@@ -179,7 +176,7 @@ if uploaded_file:
         cell_m.value = f"=$A{r}-$E{r}"
         cell_m.font = Font(name="Calibri", size=11)
 
-        # N (col 14): bucket based on L
+        # N (col 14): bucket based on L static references
         cell_n = sheet2.cell(row=r, column=14)
         cell_n.value = (
             f"=IF(AND($L{r}<=7),\"< 7\","
