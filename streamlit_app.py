@@ -110,9 +110,13 @@ st.markdown("""
 <div class="tagline">the happiest place on earth (for VLOOKUP formulas).</div>
 """, unsafe_allow_html=True)
 
-# ---------------- File Upload ---------------- #
+# ---------------- File Upload (Hidden Label) ---------------- #
 st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
-uploaded_file = st.file_uploader("", type="xlsx")
+uploaded_file = st.file_uploader(
+    "PCARD file uploader for accessibility",
+    type="xlsx",
+    label_visibility="hidden"
+)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------- Info Message ---------------- #
@@ -134,7 +138,7 @@ if uploaded_file:
     sheet2 = wb.worksheets[1]
     max_row = sheet1.max_row
 
-    # A-column concatenation + Calibri 11
+    # A-column concatenation formulas + Calibri 11
     for sheet in (sheet1, sheet2):
         for row in range(2, max_row + 1):
             cell = sheet[f"A{row}"]
@@ -147,7 +151,6 @@ if uploaded_file:
         sheet2[f"Q{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")'
         sheet2[f"R{row}"] = f'=IF(P{row}=0,"",P{row})'
         sheet2[f"S{row}"] = f'=IF(Q{row}=0,"",Q{row})'
-        # values-only paste R→P, S→Q
         sheet2[f"P{row}"].value = sheet2[f"R{row}"].value
         sheet2[f"Q{row}"].value = sheet2[f"S{row}"].value
 
