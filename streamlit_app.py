@@ -134,7 +134,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------- Excel Logic (Pure-Values + L/M/N) ---------------- #
+# ---------------- Excel Logic (Pure-Values + M/N/O) ---------------- #
 if uploaded_file:
     # hide default alert
     st.markdown("<div></div>", unsafe_allow_html=True)
@@ -175,28 +175,29 @@ if uploaded_file:
         sheet2.cell(r, 16).value = p_val
         sheet2.cell(r, 17).value = q_val
 
-    # 4) Inject L and M formulas into Sheet2
+    # 4) Inject M, N, O formulas into Sheet2 (so pasted → EBSS L, M, N)
     for r in range(2, sheet2.max_row + 1):
-        # L = A - E
-        sheet2[f"L{r}"] = f"=A{r}-E{r}"
-        # M = bucket logic on L
-        sheet2[f"M{r}"] = (
-            f'=IF(AND($L{r}<=7)," < 7",'
-            f'IF(AND($L{r}>7,$L{r}<=11)," 8-11",'
-            f'IF(AND($L{r}>11,$L{r}<=15),"12-15",'
-            f'IF(AND($L{r}>15,$L{r}<=30),"16-30",'
-            f'IF(AND($L{r}>30,$L{r}<=45),"30-45",'
-            f'IF(AND($L{r}>45,$L{r}<=59),"46-59",'
-            f'IF($L{r}>59,"60+","Invalid")))))))'
+        # M = days difference = A – E
+        sheet2[f"M{r}"] = f"=A{r}-E{r}"
+        # N = bucket logic on M
+        sheet2[f"N{r}"] = (
+            f'=IF(AND($M{r}<=7)," < 7",'
+            f'IF(AND($M{r}>7,$M{r}<=11)," 8-11",'
+            f'IF(AND($M{r}>11,$M{r}<=15),"12-15",'
+            f'IF(AND($M{r}>15,$M{r}<=30),"16-30",'
+            f'IF(AND($M{r}>30,$M{r}<=45),"30-45",'
+            f'IF(AND($M{r}>45,$M{r}<=59),"46-59",'
+            f'IF($M{r}>59,"60+","Invalid")))))))'
         )
-        # N = static: expense date + 16 days
+        # O = static: expense date (E) + 16 days
         exp = sheet2.cell(r, 5).value  # column E
-        rec_date = None
         if isinstance(exp, (datetime.date, datetime.datetime)):
             rec_date = exp + datetime.timedelta(days=16)
-        cellN = sheet2[f"N{r}"]
-        cellN.value = rec_date
-        cellN.number_format = 'mm/dd/yyyy'
+        else:
+            rec_date = None
+        cellO = sheet2[f"O{r}"]
+        cellO.value = rec_date
+        cellO.number_format = 'mm/dd/yyyy'
 
     # 5) Save to buffer & download link
     buf = BytesIO()
