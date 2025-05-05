@@ -1,7 +1,6 @@
 import streamlit as st
 import openpyxl
 from openpyxl.styles import Font
-import datetime
 from io import BytesIO
 import base64
 
@@ -134,22 +133,30 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------- Excel Logic ---------------- #
+# ---------------- Excel Logic (Pure-Values) ---------------- #
 if uploaded_file:
-    wb = openpyxl.load_workbook(uploaded_file)
-    sheet1, sheet2 = wb.worksheets[0], wb.worksheets[1]
+    # hide default alert
+    st.markdown("<div></div>", unsafe_allow_html=True)
 
-    # 1) A-column formulas in both sheets (Calibri 11)
+    wb = openpyxl.load_workbook(uploaded_file)
+    sheet1 = wb.worksheets[0]
+    sheet2 = wb.worksheets[1]
+
+    # 1) A-column formulas in both sheets (Calibri 11), filling each to its own max_row
     for sht in (sheet1, sheet2):
-        for r in range(2, sht.max_row + 1):
-            cell = sht[f"A{r}"]
-            cell.value = f"=F{r}&G{r}&H{r}"
-            cell.font = Font(name="Calibri", size=11)
+        max_r = sht.max_row
+        for r in range(2, max_r + 1):
+            c = sht[f"A{r}"]
+            c.value = f"=F{r}&G{r}&H{r}"
+            c.font = Font(name="Calibri", size=11)
 
     # 2) Build lookup dict from Sheet1
     lookup = {}
     for r in range(2, sheet1.max_row + 1):
-        key = "".join(str(sheet1.cell(r, c).value or "") for c in (6, 7, 8))
+        f = sheet1.cell(r, 6).value or ""
+        g = sheet1.cell(r, 7).value or ""
+        h = sheet1.cell(r, 8).value or ""
+        key = f"{f}{g}{h}"
         p = sheet1.cell(r, 16).value
         q = sheet1.cell(r, 17).value
         lookup[key] = (
@@ -159,42 +166,15 @@ if uploaded_file:
 
     # 3) Write static values into Sheet2's P & Q
     for r in range(2, sheet2.max_row + 1):
-        key = "".join(str(sheet2.cell(r, c).value or "") for c in (6, 7, 8))
+        f = sheet2.cell(r, 6).value or ""
+        g = sheet2.cell(r, 7).value or ""
+        h = sheet2.cell(r, 8).value or ""
+        key = f"{f}{g}{h}"
         p_val, q_val = lookup.get(key, ("", ""))
         sheet2.cell(r, 16).value = p_val
         sheet2.cell(r, 17).value = q_val
 
-    # 4) Inject M, N, O formulas into Sheet2 (maps to EBSS L, M, N)
-    for r in range(2, sheet2.max_row + 1):
-        # M = A - E
-        sheet2[f"M{r}"] = f"=A{r}-E{r}"
-
-        # N = bucket logic on L (will activate once M→L is pasted in EBSS)
-        sheet2[f"N{r}"] = (
-            f'=IF(AND($L{r}<=7),"< 7",'
-            f'IF(AND($L{r}>7,$L{r}<=11),"8-11",'
-            f'IF(AND($L{r}>11,$L{r}<=15),"12-15",'
-            f'IF(AND($L{r}>15,$L{r}<=30),"16-30",'
-            f'IF(AND($L{r}>30,$L{r}<=45),"30-45",'
-            f'IF(AND($L{r}>45,$L{r}<=59),"46-59",'
-            f'IF($L{r}>59,"60 +","Invalid")))))))'
-        )
-
-        # O = static: expense date in E + 16 days
-        exp = sheet2.cell(r, 5).value
-        rec_date = (
-            exp + datetime.timedelta(days=16)
-            if isinstance(exp, (datetime.date, datetime.datetime))
-            else None
-        )
-        cellO = sheet2[f"O{r}"]
-        cellO.value = rec_date
-        cellO.number_format = 'mm/dd/yyyy'
-
-    # 4b) widen O so dates display
-    sheet2.column_dimensions["O"].width = 12
-
-    # 5) Save & provide download link
+    # 4) Save & provide download link
     buf = BytesIO()
     wb.save(buf)
     b64 = base64.b64encode(buf.getvalue()).decode()
