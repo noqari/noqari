@@ -136,29 +136,32 @@ st.markdown(
 
 # ---------------- Excel Logic (Pure-Values + EBBS Formulas + Conditional Formatting) ---------------- #
 if uploaded_file:
-    # Load workbook and force full recalculation on open
+    st.markdown("<div></div>", unsafe_allow_html=True)
+
     wb = openpyxl.load_workbook(uploaded_file)
-    wb.calculation_properties.fullCalcOnLoad = True
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
-    # 1) A-column formulas in both sheets
+    # 1) A-column formulas
     for sht in (sheet1, sheet2):
         for r in range(2, sht.max_row + 1):
             cell = sht[f"A{r}"]
             cell.value = f"=F{r}&G{r}&H{r}"
             cell.font = Font(name="Calibri", size=11)
 
-    # 2) Build lookup dict from Sheet1
+    # 2) Build lookup from Sheet1
     lookup = {}
     for r in range(2, sheet1.max_row + 1):
         f = sheet1.cell(r, 6).value or ""
         g = sheet1.cell(r, 7).value or ""
         h = sheet1.cell(r, 8).value or ""
         key = f"{f}{g}{h}"
-        lookup[key] = (sheet1.cell(r, 16).value, sheet1.cell(r, 17).value)
+        lookup[key] = (
+            sheet1.cell(r, 16).value,
+            sheet1.cell(r, 17).value
+        )
 
-    # 3) Write static values into Sheet2's P & Q
+    # 3) Write P & Q in Sheet2
     for r in range(2, sheet2.max_row + 1):
         f = sheet2.cell(r, 6).value or ""
         g = sheet2.cell(r, 7).value or ""
@@ -171,12 +174,11 @@ if uploaded_file:
     # 4) Inject EBBS formulas into M, N, O
     max_r = sheet2.max_row
     for r in range(2, max_r + 1):
-        # M (col 13): absolute A - E
+        # M: difference A - E
         cell_m = sheet2.cell(row=r, column=13)
         cell_m.value = f"=$A{r}-$E{r}"
         cell_m.font = Font(name="Calibri", size=11)
-
-        # N (col 14): bucket based on L static references
+        # N: bucket based on L
         cell_n = sheet2.cell(row=r, column=14)
         cell_n.value = (
             f"=IF(AND($L{r}<=7),\"< 7\","
@@ -188,37 +190,32 @@ if uploaded_file:
             f"IF($L{r}>59,\"60 +\",\"Invalid\")))))))"
         )
         cell_n.font = Font(name="Calibri", size=11)
-
-        # O (col 15): date = F + 16, numeric format
+        # O: date = F + 16
         cell_o = sheet2.cell(row=r, column=15)
         cell_o.value = f'=TEXT(F{r}+16,"mm/dd/yyyy")'
         cell_o.font = Font(name="Calibri", size=11)
 
-    # 5) Apply Excel conditional-formatting rules to column N
+    # 5) Apply conditional formatting to column N
     cf_range = f"N2:N{max_r}"
-    green  = PatternFill(fill_type='solid', fgColor='C6EFCE')  # ≤ 7
-    yellow = PatternFill(fill_type='solid', fgColor='FFEB9C')  # 8-11
-    orange = PatternFill(fill_type='solid', fgColor='FCE4D6')  # 12-15
-    red    = PatternFill(fill_type='solid', fgColor='FFC7CE')  # > 15
+    rules = [
+        ('"< 7"', 'C6EFCE'),
+        ('"8-11"', 'FFEB9C'),
+        ('"12-15"', 'FCE4D6'),
+        ('"16-30"', 'FFC7CE'),
+        ('"30-45"', 'FFC7CE'),
+        ('"46-59"', 'FFC7CE'),
+        ('"60 +"', 'FFC7CE'),
+    ]
+    for formula, color in rules:
+        rule = CellIsRule(
+            operator='equal',
+            formula=[formula],
+            stopIfTrue=True,
+            fill=PatternFill(fill_type='solid', fgColor=color)
+        )
+        sheet2.conditional_formatting.add(cf_range, rule)
 
-    sheet2.conditional_formatting.add(
-        cf_range,
-        CellIsRule(operator='lessThanOrEqual', formula=['7'],      fill=green)
-    )
-    sheet2.conditional_formatting.add(
-        cf_range,
-        CellIsRule(operator='between',        formula=['8','11'],  fill=yellow)
-    )
-    sheet2.conditional_formatting.add(
-        cf_range,
-        CellIsRule(operator='between',        formula=['12','15'], fill=orange)
-    )
-    sheet2.conditional_formatting.add(
-        cf_range,
-        CellIsRule(operator='greaterThan',    formula=['15'],      fill=red)
-    )
-
-    # 6) Save & provide download link
+    # 6) Save & download
     buf = BytesIO()
     wb.save(buf)
     b64 = base64.b64encode(buf.getvalue()).decode()
