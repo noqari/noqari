@@ -68,7 +68,7 @@ div[data-testid="stAlert"] {
   text-align: center;
 }
 
-/* Browse button styling */
+/* Browse files button */
 div[data-testid="stFileUploader"] button {
   background-color: #FF69B4 !important;
   color: #ffffff !important;
@@ -85,7 +85,7 @@ div[data-testid="stFileUploader"] button::after {
     rgba(255,255,255,0.5),
     rgba(255,255,255,0.2)
   );
-  transition: all .5s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 div[data-testid="stFileUploader"] button:hover::after {
   left: 100%;
@@ -135,24 +135,24 @@ st.markdown(
 
 # ---------------- Excel Logic (Pure-Values) ---------------- #
 if uploaded_file:
-    # hide default Alert
+    # hide default alert
     st.markdown("<div></div>", unsafe_allow_html=True)
 
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
-    max_row = sheet1.max_row
 
-    # 1) A2&A… formulas with Calibri 11
+    # 1) A-column formulas in both sheets (Calibri 11), filling each to its own max_row
     for sht in (sheet1, sheet2):
-        for r in range(2, max_row + 1):
+        max_r = sht.max_row
+        for r in range(2, max_r + 1):
             c = sht[f"A{r}"]
             c.value = f"=F{r}&G{r}&H{r}"
             c.font = Font(name="Calibri", size=11)
 
-    # 2) Build Python lookup from Sheet1
+    # 2) Build lookup dict from Sheet1
     lookup = {}
-    for r in range(2, max_row + 1):
+    for r in range(2, sheet1.max_row + 1):
         f = sheet1.cell(r, 6).value or ""
         g = sheet1.cell(r, 7).value or ""
         h = sheet1.cell(r, 8).value or ""
@@ -164,8 +164,8 @@ if uploaded_file:
             "" if q in (0, None) else q
         )
 
-    # 3) Write static P/Q into Sheet2
-    for r in range(2, max_row + 1):
+    # 3) Write static values into Sheet2's P & Q
+    for r in range(2, sheet2.max_row + 1):
         f = sheet2.cell(r, 6).value or ""
         g = sheet2.cell(r, 7).value or ""
         h = sheet2.cell(r, 8).value or ""
