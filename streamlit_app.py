@@ -190,8 +190,8 @@ if uploaded_file:
             f"IF($M{r}>59,\"60 +\",\"Invalid\")))))))"
         )
         sheet2.cell(row=r, column=14).font = Font(name="Calibri", size=11)
-        # O (col 15) = TEXT(F + 16) in date format dd-mmm-yy
-        sheet2.cell(row=r, column=15).value = f'=TEXT(F{r}+16,"dd-mmm-yy")'
+        # O (col 15) = TEXT(F + 16) in date format mm/dd/yyyy
+        sheet2.cell(row=r, column=15).value = f'=TEXT(F{r}+16,"mm/dd/yyyy")'
         sheet2.cell(row=r, column=15).font = Font(name="Calibri", size=11)
 
     # 5) Save & provide download link
@@ -219,7 +219,7 @@ if uploaded_file:
            border-radius: 10px;
            text-decoration: none;
            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-           transition: all 0.3s ease-in-out;
+          transition: all 0.3s ease-in-out;
          "
          onmouseover="this.style.opacity=0.9"
          onmouseout="this.style.opacity=1"
