@@ -5,7 +5,7 @@ from io import BytesIO
 import base64
 
 # ---------------- Page Config ---------------- #
-st.set_page_config(page_title="welecom to noqari: v1.0", layout="centered")
+st.set_page_config(page_title="noqari 1.0", layout="centered")
 
 # ---------------- Custom CSS ---------------- #
 st.markdown("""
