@@ -174,7 +174,27 @@ if uploaded_file:
         sheet2.cell(r, 16).value = p_val
         sheet2.cell(r, 17).value = q_val
 
-    # 4) Save & provide download link
+    # 4) Inject EBBS formulas into columns M, N and O (for later paste into EBBS L/M/N)
+    for r in range(2, sheet2.max_row + 1):
+        # M (col 13) = A - E
+        sheet2.cell(row=r, column=13).value = f"=A{r}-E{r}"
+        sheet2.cell(row=r, column=13).font = Font(name="Calibri", size=11)
+        # N (col 14) = bucketed IF on M
+        sheet2.cell(row=r, column=14).value = (
+            f"=IF(AND($M{r}<=7),""< 7"","
+            f"IF(AND($M{r}>7,$M{r}<=11),""8-11"","
+            f"IF(AND($M{r}>11,$M{r}<=15),""12-15"","
+            f"IF(AND($M{r}>15,$M{r}<=30),""16-30"","
+            f"IF(AND($M{r}>30,$M{r}<=45),""30-45"","
+            f"IF(AND($M{r}>45,$M{r}<=59),""46-59"","
+            f"IF($M{r}>59,""60 +"",""Invalid"")))))))"
+        )
+        sheet2.cell(row=r, column=14).font = Font(name="Calibri", size=11)
+        # O (col 15) = E + 16
+        sheet2.cell(row=r, column=15).value = f"=E{r}+16"
+        sheet2.cell(row=r, column=15).font = Font(name="Calibri", size=11)
+
+    # 5) Save & provide download link
     buf = BytesIO()
     wb.save(buf)
     b64 = base64.b64encode(buf.getvalue()).decode()
