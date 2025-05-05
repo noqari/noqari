@@ -62,6 +62,7 @@ section.main { background-color: #ffffff !important; }
     color: #FF69B4;
     margin-top: 8px;
 }
+
 /* Hide default uploader label */
 section[data-testid="stFileUploader"] label { display: none !important; }
 /* Center info alert */
@@ -90,7 +91,17 @@ div[data-testid="stFileUploader"] button:hover::after {
     left: 100%;
 }
 
-/* NOTE: Removed the “clear‐file X” CSS override so it will use Streamlit’s default styling again */
+/* Clear-file “X”: solid pink icon, no border or background */
+div[data-testid="stFileUploadProgress"] button {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+div[data-testid="stFileUploadProgress"] button > svg,
+div[data-testid="stFileUploadProgress"] button > svg path {
+    fill: #FF69B4 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
