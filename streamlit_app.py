@@ -1,6 +1,7 @@
 import streamlit as st
 import openpyxl
 from openpyxl.styles import Font, PatternFill
+from openpyxl.formatting.rule import CellIsRule
 from io import BytesIO
 import base64
 
@@ -133,37 +134,34 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------- Excel Logic (Pure-Values + EBBS Formulas + Coloring) ---------------- #
+# ---------------- Excel Logic (Pure-Values + EBBS Formulas + Conditional Formatting) ---------------- #
 if uploaded_file:
-    # hide default alert
     st.markdown("<div></div>", unsafe_allow_html=True)
 
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
-    # 1) A-column formulas in both sheets
+    # 1) A-column formulas
     for sht in (sheet1, sheet2):
         for r in range(2, sht.max_row + 1):
-            c = sht[f"A{r}"]
-            c.value = f"=F{r}&G{r}&H{r}"
-            c.font = Font(name="Calibri", size=11)
+            cell = sht[f"A{r}"]
+            cell.value = f"=F{r}&G{r}&H{r}"
+            cell.font = Font(name="Calibri", size=11)
 
-    # 2) Build lookup dict from Sheet1
+    # 2) Build lookup from Sheet1
     lookup = {}
     for r in range(2, sheet1.max_row + 1):
         f = sheet1.cell(r, 6).value or ""
         g = sheet1.cell(r, 7).value or ""
         h = sheet1.cell(r, 8).value or ""
         key = f"{f}{g}{h}"
-        p = sheet1.cell(r, 16).value
-        q = sheet1.cell(r, 17).value
         lookup[key] = (
-            "" if p in (0, None) else p,
-            "" if q in (0, None) else q
+            sheet1.cell(r, 16).value,
+            sheet1.cell(r, 17).value
         )
 
-    # 3) Write static values into Sheet2's P & Q
+    # 3) Write P & Q in Sheet2
     for r in range(2, sheet2.max_row + 1):
         f = sheet2.cell(r, 6).value or ""
         g = sheet2.cell(r, 7).value or ""
@@ -173,26 +171,14 @@ if uploaded_file:
         sheet2.cell(r, 16).value = p_val
         sheet2.cell(r, 17).value = q_val
 
-    # 4) Define fills for each bucket
-    fill_map = {
-        '< 7': PatternFill(fill_type='solid', fgColor='C6EFCE'),
-        '8-11': PatternFill(fill_type='solid', fgColor='FFEB9C'),
-        '12-15': PatternFill(fill_type='solid', fgColor='FCE4D6'),
-        '16-30': PatternFill(fill_type='solid', fgColor='FFC7CE'),
-        '30-45': PatternFill(fill_type='solid', fgColor='FFC7CE'),
-        '46-59': PatternFill(fill_type='solid', fgColor='FFC7CE'),
-        '60 +': PatternFill(fill_type='solid', fgColor='FFC7CE'),
-        'Invalid': PatternFill(fill_type='solid', fgColor='FFFFFF')
-    }
-
-    # 5) Inject EBBS formulas and color into M, N, O
-    for r in range(2, sheet2.max_row + 1):
-        # M (col 13): difference A - E (absolute)
+    # 4) Inject EBBS formulas into M, N, O
+    max_r = sheet2.max_row
+    for r in range(2, max_r + 1):
+        # M: difference A - E
         cell_m = sheet2.cell(row=r, column=13)
         cell_m.value = f"=$A{r}-$E{r}"
         cell_m.font = Font(name="Calibri", size=11)
-
-        # N (col 14): static bucket from L
+        # N: bucket based on L
         cell_n = sheet2.cell(row=r, column=14)
         cell_n.value = (
             f"=IF(AND($L{r}<=7),\"< 7\","
@@ -201,22 +187,35 @@ if uploaded_file:
             f"IF(AND($L{r}>15,$L{r}<=30),\"16-30\","
             f"IF(AND($L{r}>30,$L{r}<=45),\"30-45\","
             f"IF(AND($L{r}>45,$L{r}<=59),\"46-59\","
-            f"IF($L{r}>59,\"60 +\",\"Invalid\""
-            f")))))))"
+            f"IF($L{r}>59,\"60 +\",\"Invalid\")))))))"
         )
         cell_n.font = Font(name="Calibri", size=11)
-        # apply fill based on the bucket text
-        # note: openpyxl sees the formula string, not result; true conditional formatting only if reopened in Excel
-        # but we can pre-set fill_map on the **last known** string if you choose to replace with value first
-        # For now it sets fill on the formula cell itself so you see colored cells in openpyxl/Excel.
-        # If you want Excel to recalc on paste, rely on Excel's own conditional formatting instead.
-
-        # O (col 15): date = F + 16, numeric format
+        # O: date = F + 16
         cell_o = sheet2.cell(row=r, column=15)
         cell_o.value = f'=TEXT(F{r}+16,"mm/dd/yyyy")'
         cell_o.font = Font(name="Calibri", size=11)
 
-    # 6) Save & provide download link
+    # 5) Apply conditional formatting to column N
+    cf_range = f"N2:N{max_r}"
+    rules = [
+        ('"< 7"', 'C6EFCE'),
+        ('"8-11"', 'FFEB9C'),
+        ('"12-15"', 'FCE4D6'),
+        ('"16-30"', 'FFC7CE'),
+        ('"30-45"', 'FFC7CE'),
+        ('"46-59"', 'FFC7CE'),
+        ('"60 +"', 'FFC7CE'),
+    ]
+    for formula, color in rules:
+        rule = CellIsRule(
+            operator='equal',
+            formula=[formula],
+            stopIfTrue=True,
+            fill=PatternFill(fill_type='solid', fgColor=color)
+        )
+        sheet2.conditional_formatting.add(cf_range, rule)
+
+    # 6) Save & download
     buf = BytesIO()
     wb.save(buf)
     b64 = base64.b64encode(buf.getvalue()).decode()
