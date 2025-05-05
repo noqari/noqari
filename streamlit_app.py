@@ -12,14 +12,14 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=DM+Serif+Display&display=swap');
 
-/* Base font & white background */
+/* Base */
 html, body, [class*="css"] {
     font-family: 'Lexend', sans-serif;
     background-color: #ffffff;
     padding: 24px;
 }
 
-/* Content container styling */
+/* Container */
 section.main { background-color: #ffffff !important; }
 .block-container {
     background-color: #ffffff;
@@ -30,7 +30,7 @@ section.main { background-color: #ffffff !important; }
     margin: auto;
 }
 
-/* Title & tagline */
+/* Title & Tagline */
 .title-text {
     font-family: 'Georgia', serif;
     font-size: 3rem;
@@ -47,7 +47,7 @@ section.main { background-color: #ffffff !important; }
     color: #FF69B4;
 }
 
-/* Uploader box */
+/* Uploader Box */
 .uploadbox {
     padding: 1rem;
     border-radius: 12px;
@@ -57,13 +57,13 @@ section.main { background-color: #ffffff !important; }
     margin-top: 0.5rem;
 }
 
-/* Info alert centering */
-div[data-testid="stAlert"] { text-align: center; }
-
-/* Hide the default empty label */
+/* Hide default (empty) uploader label */
 section[data-testid="stFileUploader"] label { display: none !important; }
 
-/* “Browse files” button styling */
+/* Center the info alert */
+div[data-testid="stAlert"] { text-align: center; }
+
+/* “Browse files” button: pink + shimmer */
 div[data-testid="stFileUploader"] button {
     background-color: #FF69B4 !important;
     color: #ffffff !important;
@@ -84,29 +84,6 @@ div[data-testid="stFileUploader"] button::after {
 }
 div[data-testid="stFileUploader"] button:hover::after {
     left: 100%;
-}
-
-/* === Clear-file “X” as a plain pink letter === */
-/* 1) Remove any background/padding from the progress container */
-div[data-testid="stFileUploadProgress"] {
-    background: none !important;
-    box-shadow: none !important;
-}
-/* 2) Remove padding on the wrapper */
-div[data-testid="stFileUploadProgress"] > div {
-    background: none !important;
-    padding: 0 !important;
-}
-/* 3) Style the Clear button itself */
-button[aria-label^="Clear"],
-button[title^="Clear"] {
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    color: #FF69B4 !important;    /* pink X */
-    font-size: inherit !important; /* keep default size */
 }
 
 /* Footer */
@@ -174,6 +151,7 @@ if uploaded_file:
         sheet2[f"Q{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")'
         sheet2[f"R{row}"] = f'=IF(P{row}=0,"",P{row})'
         sheet2[f"S{row}"] = f'=IF(Q{row}=0,"",Q{row})'
+        # values-only paste R→P, S→Q
         sheet2[f"P{row}"].value = sheet2[f"R{row}"].value
         sheet2[f"Q{row}"].value = sheet2[f"S{row}"].value
 
