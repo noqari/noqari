@@ -1,6 +1,7 @@
 import streamlit as st
 import openpyxl
 from openpyxl.styles import Font
+import datetime
 from io import BytesIO
 import base64
 
@@ -133,7 +134,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------- Excel Logic (Pure-Values) ---------------- #
+# ---------------- Excel Logic (Pure-Values + L/M/N) ---------------- #
 if uploaded_file:
     # hide default alert
     st.markdown("<div></div>", unsafe_allow_html=True)
@@ -142,7 +143,7 @@ if uploaded_file:
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
-    # 1) A-column formulas in both sheets (Calibri 11), filling each to its own max_row
+    # 1) A-column formulas in both sheets (Calibri 11)
     for sht in (sheet1, sheet2):
         max_r = sht.max_row
         for r in range(2, max_r + 1):
@@ -174,7 +175,30 @@ if uploaded_file:
         sheet2.cell(r, 16).value = p_val
         sheet2.cell(r, 17).value = q_val
 
-    # 4) Save & provide download link
+    # 4) Inject L and M formulas into Sheet2
+    for r in range(2, sheet2.max_row + 1):
+        # L = A - E
+        sheet2[f"L{r}"] = f"=A{r}-E{r}"
+        # M = bucket logic on L
+        sheet2[f"M{r}"] = (
+            f'=IF(AND($L{r}<=7)," < 7",'
+            f'IF(AND($L{r}>7,$L{r}<=11)," 8-11",'
+            f'IF(AND($L{r}>11,$L{r}<=15),"12-15",'
+            f'IF(AND($L{r}>15,$L{r}<=30),"16-30",'
+            f'IF(AND($L{r}>30,$L{r}<=45),"30-45",'
+            f'IF(AND($L{r}>45,$L{r}<=59),"46-59",'
+            f'IF($L{r}>59,"60+","Invalid")))))))'
+        )
+        # N = static: expense date + 16 days
+        exp = sheet2.cell(r, 5).value  # column E
+        rec_date = None
+        if isinstance(exp, (datetime.date, datetime.datetime)):
+            rec_date = exp + datetime.timedelta(days=16)
+        cellN = sheet2[f"N{r}"]
+        cellN.value = rec_date
+        cellN.number_format = 'mm/dd/yyyy'
+
+    # 5) Save to buffer & download link
     buf = BytesIO()
     wb.save(buf)
     b64 = base64.b64encode(buf.getvalue()).decode()
