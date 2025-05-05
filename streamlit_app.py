@@ -136,70 +136,67 @@ st.markdown(
 
 # ---------------- Excel Logic (Pure-Values + M/N/O) ---------------- #
 if uploaded_file:
-    # hide default alert
-    st.markdown("<div></div>", unsafe_allow_html=True)
+    st.markdown("<div></div>", unsafe_allow_html=True)  # hide default alert
 
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
-    # 1) A-column formulas in both sheets (Calibri 11)
+    # 1) Put =F&G&H into A on both sheets, Calibri 11
     for sht in (sheet1, sheet2):
-        max_r = sht.max_row
-        for r in range(2, max_r + 1):
+        for r in range(2, sht.max_row + 1):
             c = sht[f"A{r}"]
             c.value = f"=F{r}&G{r}&H{r}"
             c.font = Font(name="Calibri", size=11)
 
-    # 2) Build lookup dict from Sheet1
+    # 2) Build lookup from sheet1
     lookup = {}
     for r in range(2, sheet1.max_row + 1):
-        f = sheet1.cell(r, 6).value or ""
-        g = sheet1.cell(r, 7).value or ""
-        h = sheet1.cell(r, 8).value or ""
-        key = f"{f}{g}{h}"
-        p = sheet1.cell(r, 16).value
-        q = sheet1.cell(r, 17).value
+        key = "".join(str(sheet1.cell(r, col).value or "")
+                      for col in (6,7,8))
+        p = sheet1.cell(r,16).value
+        q = sheet1.cell(r,17).value
         lookup[key] = (
-            "" if p in (0, None) else p,
-            "" if q in (0, None) else q
+            "" if p in (0,None) else p,
+            "" if q in (0,None) else q
         )
 
-    # 3) Write static values into Sheet2's P & Q
+    # 3) Write static P/Q in sheet2
     for r in range(2, sheet2.max_row + 1):
-        f = sheet2.cell(r, 6).value or ""
-        g = sheet2.cell(r, 7).value or ""
-        h = sheet2.cell(r, 8).value or ""
-        key = f"{f}{g}{h}"
-        p_val, q_val = lookup.get(key, ("", ""))
-        sheet2.cell(r, 16).value = p_val
-        sheet2.cell(r, 17).value = q_val
+        key = "".join(str(sheet2.cell(r, col).value or "")
+                      for col in (6,7,8))
+        p_val, q_val = lookup.get(key, ("",""))
+        sheet2.cell(r,16).value = p_val
+        sheet2.cell(r,17).value = q_val
 
-    # 4) Inject M, N, O formulas into Sheet2 (so pasted → EBSS L, M, N)
+    # 4) Inject M/N/O formulas into sheet2
     for r in range(2, sheet2.max_row + 1):
-        # M = days difference = A – E
+        # M = A - E
         sheet2[f"M{r}"] = f"=A{r}-E{r}"
-        # N = bucket logic on M
+        # N = nested IF buckets on M
         sheet2[f"N{r}"] = (
-            f'=IF(AND($M{r}<=7)," < 7",'
-            f'IF(AND($M{r}>7,$M{r}<=11)," 8-11",'
-            f'IF(AND($M{r}>11,$M{r}<=15),"12-15",'
-            f'IF(AND($M{r}>15,$M{r}<=30),"16-30",'
-            f'IF(AND($M{r}>30,$M{r}<=45),"30-45",'
-            f'IF(AND($M{r}>45,$M{r}<=59),"46-59",'
-            f'IF($M{r}>59,"60+","Invalid")))))))'
+            f'=IF($M{r}<=7,"< 7",'
+            f'IF($M{r}<=11,"8-11",'
+            f'IF($M{r}<=15,"12-15",'
+            f'IF($M{r}<=30,"16-30",'
+            f'IF($M{r}<=45,"30-45",'
+            f'IF($M{r}<=59,"46-59",'
+            f'IF($M{r}>59,"60+","")))))))'
         )
-        # O = static: expense date (E) + 16 days
-        exp = sheet2.cell(r, 5).value  # column E
+        # O = static expense date + 16 days
+        exp = sheet2.cell(r,5).value
         if isinstance(exp, (datetime.date, datetime.datetime)):
             rec_date = exp + datetime.timedelta(days=16)
         else:
             rec_date = None
-        cellO = sheet2[f"O{r}"]
-        cellO.value = rec_date
-        cellO.number_format = 'mm/dd/yyyy'
+        o_cell = sheet2[f"O{r}"]
+        o_cell.value = rec_date
+        o_cell.number_format = 'mm/dd/yyyy'
 
-    # 5) Save to buffer & download link
+    # 4b) widen O so dates display
+    sheet2.column_dimensions["O"].width = 12
+
+    # 5) Save & provide download link
     buf = BytesIO()
     wb.save(buf)
     b64 = base64.b64encode(buf.getvalue()).decode()
