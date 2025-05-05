@@ -134,7 +134,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------- Excel Logic (Pure-Values + M/N/O) ---------------- #
+# ---------------- Excel Logic ---------------- #
 if uploaded_file:
     st.markdown("<div></div>", unsafe_allow_html=True)  # hide default alert
 
@@ -155,7 +155,7 @@ if uploaded_file:
         key = "".join(str(sheet1.cell(r, c).value or "") for c in (6,7,8))
         p = sheet1.cell(r,16).value
         q = sheet1.cell(r,17).value
-        lookup[key] = ("", "") if p in (0,None) and q in (0,None) else (
+        lookup[key] = (
             "" if p in (0,None) else p,
             "" if q in (0,None) else q
         )
@@ -167,32 +167,34 @@ if uploaded_file:
         sheet2.cell(r,16).value = p_val
         sheet2.cell(r,17).value = q_val
 
-    # 4) Inject M, N, O formulas per-row
+    # 4) Inject M, N, O formulas into Sheet2
     for r in range(2, sheet2.max_row + 1):
-        # M = A - E
+        # column M = A - E
         sheet2[f"M{r}"] = f"=A{r}-E{r}"
 
-        # N = bucket logic on M
+        # column N = bucket logic on L (empty until L is filled downstream)
         sheet2[f"N{r}"] = (
-            f'=IF($M{r}<=7,"< 7",'
-            f'IF($M{r}<=11,"8-11",'
-            f'IF($M{r}<=15,"12-15",'
-            f'IF($M{r}<=30,"16-30",'
-            f'IF($M{r}<=45,"30-45",'
-            f'IF($M{r}<=59,"46-59",'
-            f'IF($M{r}>59,"60+","")))))))'
+            f'=IF($L{r}<=7,"< 7",'
+            f'IF($L{r}<=11,"8-11",'
+            f'IF($L{r}<=15,"12-15",'
+            f'IF($L{r}<=30,"16-30",'
+            f'IF($L{r}<=45,"30-45",'
+            f'IF($L{r}<=59,"46-59",'
+            f'IF($L{r}>59,"60+","")))))))'
         )
 
-        # O = static: expense date + 16 days
+        # column O = expense date (E) + 16 days
         exp = sheet2.cell(r,5).value
-        rec_date = (exp + datetime.timedelta(days=16)
-                    if isinstance(exp, (datetime.date, datetime.datetime))
-                    else None)
+        rec_date = (
+            exp + datetime.timedelta(days=16)
+            if isinstance(exp, (datetime.date, datetime.datetime))
+            else None
+        )
         o_cell = sheet2[f"O{r}"]
         o_cell.value = rec_date
         o_cell.number_format = 'mm/dd/yyyy'
 
-    # 4b) widen O
+    # 4b) widen O so dates show
     sheet2.column_dimensions["O"].width = 12
 
     # 5) Save & download link
