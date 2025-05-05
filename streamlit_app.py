@@ -181,17 +181,17 @@ if uploaded_file:
         sheet2.cell(row=r, column=13).font = Font(name="Calibri", size=11)
         # N (col 14) = bucketed IF on M
         sheet2.cell(row=r, column=14).value = (
-            f"=IF(AND($M{r}<=7),""< 7"","
-            f"IF(AND($M{r}>7,$M{r}<=11),""8-11"","
-            f"IF(AND($M{r}>11,$M{r}<=15),""12-15"","
-            f"IF(AND($M{r}>15,$M{r}<=30),""16-30"","
-            f"IF(AND($M{r}>30,$M{r}<=45),""30-45"","
-            f"IF(AND($M{r}>45,$M{r}<=59),""46-59"","
-            f"IF($M{r}>59,""60 +"",""Invalid"")))))))"
+            f"=IF(AND($M{r}<=7),\"< 7\","
+            f"IF(AND($M{r}>7,$M{r}<=11),\"8-11\","
+            f"IF(AND($M{r}>11,$M{r}<=15),\"12-15\","
+            f"IF(AND($M{r}>15,$M{r}<=30),\"16-30\","
+            f"IF(AND($M{r}>30,$M{r}<=45),\"30-45\","
+            f"IF(AND($M{r}>45,$M{r}<=59),\"46-59\","
+            f"IF($M{r}>59,\"60 +\",\"Invalid\")))))))"
         )
         sheet2.cell(row=r, column=14).font = Font(name="Calibri", size=11)
-        # O (col 15) = E + 16
-        sheet2.cell(row=r, column=15).value = f"=E{r}+16"
+        # O (col 15) = F + 16
+        sheet2.cell(row=r, column=15).value = f"=F{r}+16"
         sheet2.cell(row=r, column=15).font = Font(name="Calibri", size=11)
 
     # 5) Save & provide download link
