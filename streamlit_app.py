@@ -142,38 +142,37 @@ if uploaded_file:
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
-    # 1) Put =F&G&H into A on both sheets, Calibri 11
+    # 1) A-col formulas in both sheets
     for sht in (sheet1, sheet2):
         for r in range(2, sht.max_row + 1):
-            c = sht[f"A{r}"]
-            c.value = f"=F{r}&G{r}&H{r}"
-            c.font = Font(name="Calibri", size=11)
+            cell = sht[f"A{r}"]
+            cell.value = f"=F{r}&G{r}&H{r}"
+            cell.font = Font(name="Calibri", size=11)
 
     # 2) Build lookup from sheet1
     lookup = {}
     for r in range(2, sheet1.max_row + 1):
-        key = "".join(str(sheet1.cell(r, col).value or "")
-                      for col in (6,7,8))
+        key = "".join(str(sheet1.cell(r, c).value or "") for c in (6,7,8))
         p = sheet1.cell(r,16).value
         q = sheet1.cell(r,17).value
-        lookup[key] = (
+        lookup[key] = ("", "") if p in (0,None) and q in (0,None) else (
             "" if p in (0,None) else p,
             "" if q in (0,None) else q
         )
 
-    # 3) Write static P/Q in sheet2
+    # 3) Static P/Q in sheet2
     for r in range(2, sheet2.max_row + 1):
-        key = "".join(str(sheet2.cell(r, col).value or "")
-                      for col in (6,7,8))
+        key = "".join(str(sheet2.cell(r, c).value or "") for c in (6,7,8))
         p_val, q_val = lookup.get(key, ("",""))
         sheet2.cell(r,16).value = p_val
         sheet2.cell(r,17).value = q_val
 
-    # 4) Inject M/N/O formulas into sheet2
+    # 4) Inject M, N, O formulas per-row
     for r in range(2, sheet2.max_row + 1):
         # M = A - E
         sheet2[f"M{r}"] = f"=A{r}-E{r}"
-        # N = nested IF buckets on M
+
+        # N = bucket logic on M
         sheet2[f"N{r}"] = (
             f'=IF($M{r}<=7,"< 7",'
             f'IF($M{r}<=11,"8-11",'
@@ -183,20 +182,20 @@ if uploaded_file:
             f'IF($M{r}<=59,"46-59",'
             f'IF($M{r}>59,"60+","")))))))'
         )
-        # O = static expense date + 16 days
+
+        # O = static: expense date + 16 days
         exp = sheet2.cell(r,5).value
-        if isinstance(exp, (datetime.date, datetime.datetime)):
-            rec_date = exp + datetime.timedelta(days=16)
-        else:
-            rec_date = None
+        rec_date = (exp + datetime.timedelta(days=16)
+                    if isinstance(exp, (datetime.date, datetime.datetime))
+                    else None)
         o_cell = sheet2[f"O{r}"]
         o_cell.value = rec_date
         o_cell.number_format = 'mm/dd/yyyy'
 
-    # 4b) widen O so dates display
+    # 4b) widen O
     sheet2.column_dimensions["O"].width = 12
 
-    # 5) Save & provide download link
+    # 5) Save & download link
     buf = BytesIO()
     wb.save(buf)
     b64 = base64.b64encode(buf.getvalue()).decode()
