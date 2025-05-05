@@ -12,11 +12,14 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=DM+Serif+Display&display=swap');
 
+/* Base font & white background */
 html, body, [class*="css"] {
     font-family: 'Lexend', sans-serif;
     background-color: #ffffff;
     padding: 24px;
 }
+
+/* Content container styling */
 section.main { background-color: #ffffff !important; }
 .block-container {
     background-color: #ffffff;
@@ -26,6 +29,8 @@ section.main { background-color: #ffffff !important; }
     max-width: 800px;
     margin: auto;
 }
+
+/* Title & tagline */
 .title-text {
     font-family: 'Georgia', serif;
     font-size: 3rem;
@@ -41,6 +46,8 @@ section.main { background-color: #ffffff !important; }
     margin: 0.5rem 0;
     color: #FF69B4;
 }
+
+/* Uploader box */
 .uploadbox {
     padding: 1rem;
     border-radius: 12px;
@@ -49,27 +56,14 @@ section.main { background-color: #ffffff !important; }
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     margin-top: 0.5rem;
 }
-.footer-note {
-    font-size: 0.95rem;
-    text-align: center;
-    margin-top: 50px;
-    color: #333;
-}
-.thank-you {
-    font-family: 'Georgia', serif;
-    text-align: center;
-    font-size: 1.1rem;
-    color: #FF69B4;
-    margin-top: 8px;
-}
 
-/* Hide default uploader label */
-section[data-testid="stFileUploader"] label { display: none !important; }
-
-/* Center info alert */
+/* Info alert centering */
 div[data-testid="stAlert"] { text-align: center; }
 
-/* Browse button: pink + shimmer */
+/* Hide the default empty label */
+section[data-testid="stFileUploader"] label { display: none !important; }
+
+/* “Browse files” button styling */
 div[data-testid="stFileUploader"] button {
     background-color: #FF69B4 !important;
     color: #ffffff !important;
@@ -92,21 +86,42 @@ div[data-testid="stFileUploader"] button:hover::after {
     left: 100%;
 }
 
-/* === Clear-file “X” override === */
-/* Target any clear button by its aria-label or title */
+/* === Clear-file “X” as a plain pink letter === */
+/* 1) Remove any background/padding from the progress container */
+div[data-testid="stFileUploadProgress"] {
+    background: none !important;
+    box-shadow: none !important;
+}
+/* 2) Remove padding on the wrapper */
+div[data-testid="stFileUploadProgress"] > div {
+    background: none !important;
+    padding: 0 !important;
+}
+/* 3) Style the Clear button itself */
 button[aria-label^="Clear"],
 button[title^="Clear"] {
-    background-color: transparent !important;
-    background-image: none !important;
+    background: none !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
     margin: 0 !important;
+    color: #FF69B4 !important;    /* pink X */
+    font-size: inherit !important; /* keep default size */
 }
-/* Force the SVG “X” path to pink */
-button[aria-label^="Clear"] svg path,
-button[title^="Clear"] svg path {
-    fill: #FF69B4 !important;
+
+/* Footer */
+.footer-note {
+    font-size: 0.95rem;
+    text-align: center;
+    margin-top: 50px;
+    color: #333;
+}
+.thank-you {
+    font-family: 'Georgia', serif;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #FF69B4;
+    margin-top: 8px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -138,7 +153,7 @@ st.markdown(
 
 # ---------------- Excel Logic (100% Untouched) ---------------- #
 if uploaded_file:
-    # Suppress default Streamlit alert
+    # suppress default Streamlit alert
     st.markdown("<div></div>", unsafe_allow_html=True)
 
     wb = openpyxl.load_workbook(uploaded_file)
@@ -159,7 +174,6 @@ if uploaded_file:
         sheet2[f"Q{row}"] = f'=IFERROR(VLOOKUP($A{row},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")'
         sheet2[f"R{row}"] = f'=IF(P{row}=0,"",P{row})'
         sheet2[f"S{row}"] = f'=IF(Q{row}=0,"",Q{row})'
-        # values-only paste R→P, S→Q
         sheet2[f"P{row}"].value = sheet2[f"R{row}"].value
         sheet2[f"Q{row}"].value = sheet2[f"S{row}"].value
 
