@@ -92,14 +92,18 @@ div[data-testid="stFileUploader"] button:hover::after {
     left: 100%;
 }
 
-/* Clear‐file “X”: solid pink icon, no pill or border */
+/* === Clear-file “X” override === */
+/* Target any clear button by its aria-label or title */
 button[aria-label^="Clear"],
 button[title^="Clear"] {
-    background: none !important;
+    background-color: transparent !important;
+    background-image: none !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
+    margin: 0 !important;
 }
+/* Force the SVG “X” path to pink */
 button[aria-label^="Clear"] svg path,
 button[title^="Clear"] svg path {
     fill: #FF69B4 !important;
