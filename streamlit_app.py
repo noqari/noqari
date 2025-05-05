@@ -146,9 +146,9 @@ if uploaded_file:
     for sht in (sheet1, sheet2):
         max_r = sht.max_row
         for r in range(2, max_r + 1):
-            c = sht[f"A{r}"]
-            c.value = f"=F{r}&G{r}&H{r}"
-            c.font = Font(name="Calibri", size=11)
+            cell = sht[f"A{r}"]
+            cell.value = f"=F{r}&G{r}&H{r}"
+            cell.font = Font(name="Calibri", size=11)
 
     # 2) Build lookup dict from Sheet1
     lookup = {}
@@ -176,21 +176,13 @@ if uploaded_file:
 
     # 4) Inject EBBS formulas into columns M, N and O (for later paste into EBBS L/M/N)
     for r in range(2, sheet2.max_row + 1):
-        # M (col 13) = $A - $E (absolute columns so references don't shift)
+        # M (col 13) = $A - $E (absolute) so it won't shift
         sheet2.cell(row=r, column=13).value = f"=$A{r}-$E{r}"
         sheet2.cell(row=r, column=13).font = Font(name="Calibri", size=11)
-        # N (col 14) = bucketed IF on M
-        sheet2.cell(row=r, column=14).value = (
-            f"=IF(AND($M{r}<=7),\"< 7\","
-            f"IF(AND($M{r}>7,$M{r}<=11),\"8-11\","
-            f"IF(AND($M{r}>11,$M{r}<=15),\"12-15\","
-            f"IF(AND($M{r}>15,$M{r}<=30),\"16-30\","
-            f"IF(AND($M{r}>30,$M{r}<=45),\"30-45\","
-            f"IF(AND($M{r}>45,$M{r}<=59),\"46-59\","
-            f"IF($M{r}>59,\"60 +\",\"Invalid\")))))))"
-        )
+        # N (col 14) = static pull from L
+        sheet2.cell(row=r, column=14).value = f"=$L{r}"
         sheet2.cell(row=r, column=14).font = Font(name="Calibri", size=11)
-        # O (col 15) = TEXT(F + 16) in date format mm/dd/yyyy
+        # O (col 15) = TEXT(F + 16) in numeric date format mm/dd/yyyy
         sheet2.cell(row=r, column=15).value = f'=TEXT(F{r}+16,"mm/dd/yyyy")'
         sheet2.cell(row=r, column=15).font = Font(name="Calibri", size=11)
 
@@ -219,7 +211,7 @@ if uploaded_file:
            border-radius: 10px;
            text-decoration: none;
            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          transition: all 0.3s ease-in-out;
+           transition: all 0.3s ease-in-out;
          "
          onmouseover="this.style.opacity=0.9"
          onmouseout="this.style.opacity=1"
