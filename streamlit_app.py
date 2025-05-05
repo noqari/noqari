@@ -12,15 +12,11 @@ st.set_page_config(page_title="noqari 1.0", layout="centered")
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=DM+Serif+Display&display=swap');
-
-/* Base page */
 html, body, [class*="css"] {
   font-family: 'Lexend', sans-serif;
   background-color: #ffffff;
   padding: 24px;
 }
-
-/* Card container */
 .block-container, section.main {
   background-color: #ffffff !important;
   border-radius: 18px;
@@ -29,8 +25,6 @@ html, body, [class*="css"] {
   max-width: 800px;
   margin: auto;
 }
-
-/* Title */
 .title-text {
   font-family: 'Georgia', serif;
   font-size: 3rem;
@@ -39,8 +33,6 @@ html, body, [class*="css"] {
   text-align: center;
   margin-bottom: 0.2rem;
 }
-
-/* Tagline */
 .tagline {
   font-family: 'DM Serif Display', serif;
   text-align: center;
@@ -48,8 +40,6 @@ html, body, [class*="css"] {
   margin: 0.5rem 0 1.5rem;
   color: #FF69B4;
 }
-
-/* Uploader box */
 .uploadbox {
   padding: 1rem;
   border-radius: 12px;
@@ -58,18 +48,12 @@ html, body, [class*="css"] {
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   margin-bottom: 1.5rem;
 }
-
-/* Hide default uploader label */
 section[data-testid="stFileUploader"] label {
   display: none !important;
 }
-
-/* Center info alert */
 div[data-testid="stAlert"] {
   text-align: center;
 }
-
-/* Browse files button */
 div[data-testid="stFileUploader"] button {
   background-color: #FF69B4 !important;
   color: #ffffff !important;
@@ -91,8 +75,6 @@ div[data-testid="stFileUploader"] button::after {
 div[data-testid="stFileUploader"] button:hover::after {
   left: 100%;
 }
-
-/* Footer text */
 .footer-note {
   font-size: 0.95rem;
   text-align: center;
@@ -109,14 +91,14 @@ div[data-testid="stFileUploader"] button:hover::after {
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- Header & Tagline ---------------- #
+# ---------------- Header ---------------- #
 st.markdown("""
 <div class="title-text">noqari 1.0</div>
 <div style="text-align:center; font-size:1.6rem;">💌</div>
 <div class="tagline">the happiest place on earth (for VLOOKUP formulas).</div>
 """, unsafe_allow_html=True)
 
-# ---------------- File Upload ---------------- #
+# ---------------- Uploader ---------------- #
 st.markdown('<div class="uploadbox">', unsafe_allow_html=True)
 uploaded_file = st.file_uploader(
     "Upload your PCARD_OPEN.xlsx",
@@ -125,7 +107,6 @@ uploaded_file = st.file_uploader(
 )
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- Info Message ---------------- #
 st.markdown(
     '<div style="text-align:center; background-color:#eaf3fc; padding:1rem; '
     'border-radius:8px; margin-bottom:2rem;">'
@@ -136,68 +117,64 @@ st.markdown(
 
 # ---------------- Excel Logic ---------------- #
 if uploaded_file:
-    st.markdown("<div></div>", unsafe_allow_html=True)  # hide default alert
-
     wb = openpyxl.load_workbook(uploaded_file)
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
-    # 1) A-col formulas in both sheets
+    # A2:Aₙ on both sheets = F&G&H in Calibri 11
     for sht in (sheet1, sheet2):
         for r in range(2, sht.max_row + 1):
-            cell = sht[f"A{r}"]
-            cell.value = f"=F{r}&G{r}&H{r}"
-            cell.font = Font(name="Calibri", size=11)
+            c = sht[f"A{r}"]
+            c.value = f"=F{r}&G{r}&H{r}"
+            c.font = Font(name="Calibri", size=11)
 
-    # 2) Build lookup from sheet1
+    # Build lookup from sheet1 A→P/Q
     lookup = {}
     for r in range(2, sheet1.max_row + 1):
-        key = "".join(str(sheet1.cell(r, c).value or "") for c in (6,7,8))
+        key = "".join(str(sheet1.cell(r,c).value or "") for c in (6,7,8))
         p = sheet1.cell(r,16).value
         q = sheet1.cell(r,17).value
-        lookup[key] = (
+        lookup[key] = ("", "") if p in (0,None) and q in (0,None) else (
             "" if p in (0,None) else p,
             "" if q in (0,None) else q
         )
 
-    # 3) Static P/Q in sheet2
+    # Paste static P/Q into sheet2
     for r in range(2, sheet2.max_row + 1):
-        key = "".join(str(sheet2.cell(r, c).value or "") for c in (6,7,8))
+        key = "".join(str(sheet2.cell(r,c).value or "") for c in (6,7,8))
         p_val, q_val = lookup.get(key, ("",""))
         sheet2.cell(r,16).value = p_val
         sheet2.cell(r,17).value = q_val
 
-    # 4) Inject M, N, O formulas into Sheet2
+    # Inject M/N/O (these map to EBSS’s L/M/N)
     for r in range(2, sheet2.max_row + 1):
-        # column M = A - E
+        # M = =A–E
         sheet2[f"M{r}"] = f"=A{r}-E{r}"
 
-        # column N = bucket logic on L (empty until L is filled downstream)
+        # N = bucket on M
         sheet2[f"N{r}"] = (
-            f'=IF($L{r}<=7,"< 7",'
-            f'IF($L{r}<=11,"8-11",'
-            f'IF($L{r}<=15,"12-15",'
-            f'IF($L{r}<=30,"16-30",'
-            f'IF($L{r}<=45,"30-45",'
-            f'IF($L{r}<=59,"46-59",'
-            f'IF($L{r}>59,"60+","")))))))'
+            f'=IF($M{r}<=7,"< 7",'
+            f'IF($M{r}<=11,"8-11",'
+            f'IF($M{r}<=15,"12-15",'
+            f'IF($M{r}<=30,"16-30",'
+            f'IF($M{r}<=45,"30-45",'
+            f'IF($M{r}<=59,"46-59",'
+            f'IF($M{r}>59,"60+","")))))))'
         )
 
-        # column O = expense date (E) + 16 days
+        # O = E + 16 days
         exp = sheet2.cell(r,5).value
-        rec_date = (
-            exp + datetime.timedelta(days=16)
-            if isinstance(exp, (datetime.date, datetime.datetime))
-            else None
-        )
+        rec = (exp + datetime.timedelta(days=16)
+               if isinstance(exp,(datetime.date,datetime.datetime))
+               else None)
         o_cell = sheet2[f"O{r}"]
-        o_cell.value = rec_date
+        o_cell.value = rec
         o_cell.number_format = 'mm/dd/yyyy'
 
-    # 4b) widen O so dates show
+    # Widen O so it shows
     sheet2.column_dimensions["O"].width = 12
 
-    # 5) Save & download link
+    # Save & offer download
     buf = BytesIO()
     wb.save(buf)
     b64 = base64.b64encode(buf.getvalue()).decode()
@@ -241,3 +218,4 @@ st.markdown("""
 </div>
 <div class="thank-you">sincerely, your tiny tab fairy</div>
 """, unsafe_allow_html=True)
+
