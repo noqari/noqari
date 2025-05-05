@@ -176,8 +176,8 @@ if uploaded_file:
 
     # 4) Inject EBBS formulas into columns M, N and O (for later paste into EBBS L/M/N)
     for r in range(2, sheet2.max_row + 1):
-        # M (col 13) = A - E
-        sheet2.cell(row=r, column=13).value = f"=A{r}-E{r}"
+        # M (col 13) = $A - $E (absolute columns so references don't shift)
+        sheet2.cell(row=r, column=13).value = f"=$A{r}-$E{r}"
         sheet2.cell(row=r, column=13).font = Font(name="Calibri", size=11)
         # N (col 14) = bucketed IF on M
         sheet2.cell(row=r, column=14).value = (
@@ -190,8 +190,8 @@ if uploaded_file:
             f"IF($M{r}>59,\"60 +\",\"Invalid\")))))))"
         )
         sheet2.cell(row=r, column=14).font = Font(name="Calibri", size=11)
-        # O (col 15) = F + 16
-        sheet2.cell(row=r, column=15).value = f"=F{r}+16"
+        # O (col 15) = TEXT(F + 16) in date format dd-mmm-yy
+        sheet2.cell(row=r, column=15).value = f'=TEXT(F{r}+16,"dd-mmm-yy")'
         sheet2.cell(row=r, column=15).font = Font(name="Calibri", size=11)
 
     # 5) Save & provide download link
