@@ -142,7 +142,7 @@ if uploaded_file:
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
-    # --- function to find true last row with any data in cols A–Q ---
+    # 1) Find the true last row with data in A–Q for each sheet
     def find_last_data_row(ws, min_col=1, max_col=17, start_row=2):
         for r in range(ws.max_row, start_row - 1, -1):
             if any(ws.cell(r, c).value not in (None, "") for c in range(min_col, max_col + 1)):
@@ -152,15 +152,17 @@ if uploaded_file:
     last1 = find_last_data_row(sheet1)
     last2 = find_last_data_row(sheet2)
 
-    # 1) A-column formulas in both sheets (Calibri 11), filling only to true last row
-    for sht, last in ((sheet1, last1), (sheet2, last2)):
-        for r in range(2, last + 1):
-            c = sht[f"A{r}"]
-            c.value = f"=F{r}&G{r}&H{r}"
-            c.font  = Font(name="Calibri", size=11)
+    # 2) A-column key formula =F#&G#&H# in both sheets, but only down to their true last rows
+    for r in range(2, last1 + 1):
+        c1 = sheet1[f"A{r}"]
+        c1.value = f"=F{r}&G{r}&H{r}"
+        c1.font  = Font(name="Calibri", size=11)
+    for r in range(2, last2 + 1):
+        c2 = sheet2[f"A{r}"]
+        c2.value = f"=F{r}&G{r}&H{r}"
+        c2.font  = Font(name="Calibri", size=11)
 
-    # 2) Build lookup dict from Sheet1 (up to sheet1’s last row),
-    #    storing None for empty/zero so we never write "" later
+    # 3) Build lookup dict from Sheet1 (rows 2…last1), storing None for blanks/zero
     lookup = {}
     for r in range(2, last1 + 1):
         f = sheet1.cell(r, 6).value or ""
@@ -174,7 +176,7 @@ if uploaded_file:
             None if q in (0, None) else q
         )
 
-    # 3) Write values into Sheet2's P & Q only when there is a lookup key
+    # 4) Populate Sheet2’s P & Q only for rows where the key exists (rows 2…last2)
     for r in range(2, last2 + 1):
         f = sheet2.cell(r, 6).value or ""
         g = sheet2.cell(r, 7).value or ""
@@ -184,9 +186,9 @@ if uploaded_file:
             p_val, q_val = lookup[key]
             sheet2.cell(r, 16).value = p_val
             sheet2.cell(r, 17).value = q_val
-        # else: leave .value as None so Excel sees it truly blank
+        # else: leave cell.value = None so it stays truly blank
 
-    # 4) Save & provide download link
+    # 5) Save & provide download link
     buf = BytesIO()
     wb.save(buf)
     b64 = base64.b64encode(buf.getvalue()).decode()
