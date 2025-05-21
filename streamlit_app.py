@@ -142,17 +142,26 @@ if uploaded_file:
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
-    # 1) A-column formulas in both sheets (Calibri 11), filling each to its own max_row
-    for sht in (sheet1, sheet2):
-        max_r = sht.max_row
-        for r in range(2, max_r + 1):
+    # --- new: function to find true last row with any data in cols A–Q ---
+    def find_last_data_row(ws, min_col=1, max_col=17, start_row=2):
+        for r in range(ws.max_row, start_row - 1, -1):
+            if any(ws.cell(r, c).value not in (None, "") for c in range(min_col, max_col + 1)):
+                return r
+        return start_row
+
+    last1 = find_last_data_row(sheet1)
+    last2 = find_last_data_row(sheet2)
+
+    # 1) A-column formulas in both sheets (Calibri 11), filling only to true last row
+    for sht, last in ((sheet1, last1), (sheet2, last2)):
+        for r in range(2, last + 1):
             c = sht[f"A{r}"]
             c.value = f"=F{r}&G{r}&H{r}"
-            c.font = Font(name="Calibri", size=11)
+            c.font  = Font(name="Calibri", size=11)
 
-    # 2) Build lookup dict from Sheet1
+    # 2) Build lookup dict from Sheet1 (only up to sheet1’s last row)
     lookup = {}
-    for r in range(2, sheet1.max_row + 1):
+    for r in range(2, last1 + 1):
         f = sheet1.cell(r, 6).value or ""
         g = sheet1.cell(r, 7).value or ""
         h = sheet1.cell(r, 8).value or ""
@@ -164,8 +173,8 @@ if uploaded_file:
             "" if q in (0, None) else q
         )
 
-    # 3) Write static values into Sheet2's P & Q
-    for r in range(2, sheet2.max_row + 1):
+    # 3) Write static values into Sheet2's P & Q only up to sheet2’s last row
+    for r in range(2, last2 + 1):
         f = sheet2.cell(r, 6).value or ""
         g = sheet2.cell(r, 7).value or ""
         h = sheet2.cell(r, 8).value or ""
