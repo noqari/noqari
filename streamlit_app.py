@@ -142,7 +142,7 @@ if uploaded_file:
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
-    # --- new: function to find true last row with any data in cols A–Q ---
+    # --- function to find true last row with any data in cols A–Q ---
     def find_last_data_row(ws, min_col=1, max_col=17, start_row=2):
         for r in range(ws.max_row, start_row - 1, -1):
             if any(ws.cell(r, c).value not in (None, "") for c in range(min_col, max_col + 1)):
@@ -159,7 +159,8 @@ if uploaded_file:
             c.value = f"=F{r}&G{r}&H{r}"
             c.font  = Font(name="Calibri", size=11)
 
-    # 2) Build lookup dict from Sheet1 (only up to sheet1’s last row)
+    # 2) Build lookup dict from Sheet1 (up to sheet1’s last row),
+    #    storing None for empty/zero so we never write "" later
     lookup = {}
     for r in range(2, last1 + 1):
         f = sheet1.cell(r, 6).value or ""
@@ -169,19 +170,21 @@ if uploaded_file:
         p = sheet1.cell(r, 16).value
         q = sheet1.cell(r, 17).value
         lookup[key] = (
-            "" if p in (0, None) else p,
-            "" if q in (0, None) else q
+            None if p in (0, None) else p,
+            None if q in (0, None) else q
         )
 
-    # 3) Write static values into Sheet2's P & Q only up to sheet2’s last row
+    # 3) Write values into Sheet2's P & Q only when there is a lookup key
     for r in range(2, last2 + 1):
         f = sheet2.cell(r, 6).value or ""
         g = sheet2.cell(r, 7).value or ""
         h = sheet2.cell(r, 8).value or ""
         key = f"{f}{g}{h}"
-        p_val, q_val = lookup.get(key, ("", ""))
-        sheet2.cell(r, 16).value = p_val
-        sheet2.cell(r, 17).value = q_val
+        if key in lookup:
+            p_val, q_val = lookup[key]
+            sheet2.cell(r, 16).value = p_val
+            sheet2.cell(r, 17).value = q_val
+        # else: leave .value as None so Excel sees it truly blank
 
     # 4) Save & provide download link
     buf = BytesIO()
