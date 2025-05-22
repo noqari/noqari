@@ -171,24 +171,21 @@ if uploaded_file:
             q if q not in (None, "") else None
         )
 
-    # 3) Insert formulas in Sheet2 P-Q capped at last data row and then R-S
-    last2 = find_last_data_row(sheet2, 1)  # use column A as anchor on Sheet2
-    # P2:P_end
+    # 3) Write static lookup values into Sheet2's P & Q, capped at last data row,
+    #    and never write when there's nothing to pull
+    last2 = find_last_data_row(sheet2, 1)  # anchor on column A of Sheet2
     for r in range(2, last2 + 1):
-        sheet2.cell(r, 16).value = (
-            f"=IFERROR(VLOOKUP($A{r},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:P),FALSE),"")"
-        )
-    # Q2:Q_end
-    for r in range(2, last2 + 1):
-        sheet2.cell(r, 17).value = (
-            f"=IFERROR(VLOOKUP($A{r},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")"
-        )
-    # R2:R_end
-    for r in range(2, last2 + 1):
-        sheet2.cell(r, 18).value = f"=IF(P{r}=0,\"\",P{r})"
-    # S2:S_end
-    for r in range(2, last2 + 1):
-        sheet2.cell(r, 19).value = f"=IF(Q{r}=0,\"\",Q{r})"
+        f = sheet2.cell(r, 6).value or ""
+        g = sheet2.cell(r, 7).value or ""
+        h = sheet2.cell(r, 8).value or ""
+        key = f"{f}{g}{h}"
+
+        p_val, q_val = lookup.get(key, (None, None))
+
+        if p_val is not None:
+            sheet2.cell(r, 16).value = p_val
+        if q_val is not None:
+            sheet2.cell(r, 17).value = q_val
 
     # 4) Save & provide download link
     buf = BytesIO()
