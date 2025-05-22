@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st 
 import openpyxl
 from openpyxl.styles import Font
 from io import BytesIO
@@ -142,29 +142,24 @@ if uploaded_file:
     sheet1 = wb.worksheets[0]
     sheet2 = wb.worksheets[1]
 
-    # 1) Find the true last row with data in A–Q for each sheet
-    def find_last_data_row(ws, min_col=1, max_col=17, start_row=2):
-        for r in range(ws.max_row, start_row - 1, -1):
-            if any(ws.cell(r, c).value not in (None, "") for c in range(min_col, max_col + 1)):
+    # Utility to find last data row by scanning a given column (e.g., F=6)
+    def find_last_data_row(sheet, col_idx):
+        for r in range(sheet.max_row, 1, -1):
+            if sheet.cell(r, col_idx).value not in (None, ""):
                 return r
-        return start_row
+        return 1
 
-    last1 = find_last_data_row(sheet1)
-    last2 = find_last_data_row(sheet2)
+    # 1) A-column formulas in both sheets, capped at real data end
+    for sht in (sheet1, sheet2):
+        last = find_last_data_row(sht, 6)
+        for r in range(2, last + 1):
+            c = sht[f"A{r}"]
+            c.value = f"=F{r}&G{r}&H{r}"
+            c.font = Font(name="Calibri", size=11)
 
-    # 2) A-column key formula =F#&G#&H# in both sheets, but only down to their true last rows
-    for r in range(2, last1 + 1):
-        c1 = sheet1[f"A{r}"]
-        c1.value = f"=F{r}&G{r}&H{r}"
-        c1.font  = Font(name="Calibri", size=11)
-    for r in range(2, last2 + 1):
-        c2 = sheet2[f"A{r}"]
-        c2.value = f"=F{r}&G{r}&H{r}"
-        c2.font  = Font(name="Calibri", size=11)
-
-    # 3) Build lookup dict from Sheet1 (rows 2…last1), storing None for blanks/zero
+    # 2) Build lookup dict from Sheet1, dropping only truly blank data (not zero)
     lookup = {}
-    for r in range(2, last1 + 1):
+    for r in range(2, sheet1.max_row + 1):
         f = sheet1.cell(r, 6).value or ""
         g = sheet1.cell(r, 7).value or ""
         h = sheet1.cell(r, 8).value or ""
@@ -172,23 +167,30 @@ if uploaded_file:
         p = sheet1.cell(r, 16).value
         q = sheet1.cell(r, 17).value
         lookup[key] = (
-            None if p in (0, None) else p,
-            None if q in (0, None) else q
+            p if p not in (None, "") else None,
+            q if q not in (None, "") else None
         )
 
-    # 4) Populate Sheet2’s P & Q only for rows where the key exists (rows 2…last2)
+    # 3) Insert formulas in Sheet2 P-Q capped at last data row and then R-S
+    last2 = find_last_data_row(sheet2, 1)  # use column A as anchor on Sheet2
+    # P2:P_end
     for r in range(2, last2 + 1):
-        f = sheet2.cell(r, 6).value or ""
-        g = sheet2.cell(r, 7).value or ""
-        h = sheet2.cell(r, 8).value or ""
-        key = f"{f}{g}{h}"
-        if key in lookup:
-            p_val, q_val = lookup[key]
-            sheet2.cell(r, 16).value = p_val
-            sheet2.cell(r, 17).value = q_val
-        # else: leave cell.value = None so it stays truly blank
+        sheet2.cell(r, 16).value = (
+            f"=IFERROR(VLOOKUP($A{r},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:P),FALSE),"")"
+        )
+    # Q2:Q_end
+    for r in range(2, last2 + 1):
+        sheet2.cell(r, 17).value = (
+            f"=IFERROR(VLOOKUP($A{r},Sheet1!$A:$Q,COLUMNS(Sheet1!$A:Q),FALSE),"")"
+        )
+    # R2:R_end
+    for r in range(2, last2 + 1):
+        sheet2.cell(r, 18).value = f"=IF(P{r}=0,\"\",P{r})"
+    # S2:S_end
+    for r in range(2, last2 + 1):
+        sheet2.cell(r, 19).value = f"=IF(Q{r}=0,\"\",Q{r})"
 
-    # 5) Save & provide download link
+    # 4) Save & provide download link
     buf = BytesIO()
     wb.save(buf)
     b64 = base64.b64encode(buf.getvalue()).decode()
